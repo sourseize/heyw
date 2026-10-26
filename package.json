@@ -1,0 +1,33 @@
+{
+  "name": "heyw",
+  "version": "1.0.0",
+  "description": "HeyWork — A calm, local-first personal work, focus & journaling OS",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "heyw": "dist/server.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "npx tsx src/server.ts",
+    "test": "node --test dist/test/*.test.js"
+  },
+  "keywords": [
+    "heywork",
+    "focus",
+    "pomodoro",
+    "tasks",
+    "kanban",
+    "journal",
+    "notes",
+    "productivity",
+    "local-first"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.0.0"
+  }
+}
