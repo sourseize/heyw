@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import { DEFAULT_TZ, DAY_NAMES, addDays, dayOfWeek, dateInZone, todayInZone } from './time.js';
 
 export interface Project {
   id: string;
@@ -30,15 +31,62 @@ export interface Task {
   createdAt: string;
 }
 
+export type TimerType = 'focus' | 'short_break' | 'long_break';
+
+/** Why a timer stopped. `completed` = ran to the planned end. */
+export type SessionEndReason = 'completed' | 'stopped' | 'switched' | 'abandoned';
+
+/** Attention signals collected while a focus block ran (advisory, client-reported). */
+export interface SessionIntegrity {
+  /** Milliseconds the HeyWork tab was hidden or the window unfocused. */
+  awayMs: number;
+  /** Times the user left the tab/window. */
+  distractions: number;
+  /** Clicks/keystrokes inside HeyWork itself — i.e. tinkering with the app. */
+  appInteractions: number;
+  /** Time at the end of the block with no sign of life from any client. */
+  unverifiedMs?: number;
+}
+
 export interface FocusSession {
   id: string;
   taskId?: string;
   taskTitle?: string;
+  /** Minutes actually spent (paused time excluded). */
   durationMinutes: number;
-  type: 'focus' | 'short_break' | 'long_break';
+  /** Minutes the block was planned for (absent on legacy records). */
+  plannedMinutes?: number;
+  type: TimerType;
   notes?: string;
+  /** True when the planned duration was reached. */
   completed: boolean;
+  endReason?: SessionEndReason;
+  /** Start of the block (legacy records used the time the session was logged). */
   timestamp: string;
+  endedAt?: string;
+  integrity?: SessionIntegrity;
+}
+
+/**
+ * The one timer the app can have running. Lives in the store (not in the browser)
+ * so it survives reloads, navigation and crashes, and so the server can finalise
+ * it even when no page is open.
+ */
+export interface ActiveTimer {
+  id: string;
+  type: TimerType;
+  taskId?: string;
+  taskTitle?: string;
+  plannedMinutes: number;
+  startedAt: string;
+  /** Accumulated running time from previous run segments. */
+  accumulatedMs: number;
+  /** ISO time the current run segment began; absent while paused. */
+  runningSince?: string;
+  /** Last sign of life from a client. */
+  lastHeartbeatAt: string;
+  integrity: SessionIntegrity;
+  notes?: string;
 }
 
 export interface DailyLog {
@@ -62,58 +110,240 @@ export interface Note {
   updatedAt: string;
 }
 
+export type ThoughtStatus = 'inbox' | 'kept' | 'converted' | 'discarded';
+
+export interface ThoughtContext {
+  view: string;
+  timerRunning: boolean;
+  timerType?: 'focus' | 'short_break' | 'long_break';
+  taskId?: string;
+  taskTitle?: string;
+}
+
+/** A stray thought parked during focus; triaged later (Phase 1). */
+export interface Thought {
+  id: string;
+  text: string;
+  status: ThoughtStatus;
+  capturedAt: string;
+  reviewedAt?: string;
+  context?: ThoughtContext;
+  taskId?: string;
+}
+
+/** Frozen, auto-generated month page of the Book of Work (Phase 2). */
+export interface MonthlySummaryRecord {
+  id: string;
+  month: string;        // YYYY-MM
+  timeZone: string;     // zone the month was bucketed in
+  generatedAt: string;  // ISO UTC
+  summary: unknown;     // MonthlySummary payload (typed in summary.ts)
+}
+
+export interface Settings {
+  /** Last IANA zone seen from a client; used by server-side jobs that have no client. */
+  timeZone?: string;
+}
+
 export interface DatabaseSchema {
   projects: Project[];
   tasks: Task[];
   focusSessions: FocusSession[];
   dailyLogs: DailyLog[];
   notes: Note[];
+  thoughts: Thought[];
+  monthlySummaries: MonthlySummaryRecord[];
+  settings: Settings;
+  /** The timer currently running or paused, if any. */
+  activeTimer: ActiveTimer | null;
 }
 
-export class Database {
-  private data: DatabaseSchema = {
+export function emptySchema(): DatabaseSchema {
+  return {
     projects: [],
     tasks: [],
     focusSessions: [],
     dailyLogs: [],
     notes: [],
+    thoughts: [],
+    monthlySummaries: [],
+    settings: {},
+    activeTimer: null,
   };
+}
 
+/**
+ * Storage codec seam. The data file is plain JSON today; an encrypting codec
+ * (e.g. AES-256-GCM with a passphrase-derived key) can be plugged in here
+ * later without touching the rest of the database.
+ */
+export interface StorageCodec {
+  encode(data: DatabaseSchema): string | Buffer;
+  decode(raw: Buffer): unknown;
+}
+
+export const jsonCodec: StorageCodec = {
+  encode: (data) => JSON.stringify(data, null, 2),
+  decode: (raw) => JSON.parse(raw.toString('utf-8')),
+};
+
+export class DatabaseFileError extends Error {
+  constructor(message: string, public readonly filePath: string) {
+    super(message);
+    this.name = 'DatabaseFileError';
+  }
+}
+
+export interface DatabaseOptions {
+  codec?: StorageCodec;
+}
+
+export const DEFAULT_DATA_FILE = () => path.join(process.cwd(), 'data', 'database.json');
+
+const ARRAY_COLLECTIONS = ['projects', 'tasks', 'focusSessions', 'dailyLogs', 'notes', 'thoughts', 'monthlySummaries'] as const;
+
+/** Normalises a parsed file into a full schema; throws on shapes that are not a HeyWork store. */
+export function normaliseSchema(parsed: unknown, filePath = '<memory>'): DatabaseSchema {
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new DatabaseFileError('Data file is not a JSON object', filePath);
+  }
+  const src = parsed as Record<string, unknown>;
+  const out = emptySchema();
+  for (const key of ARRAY_COLLECTIONS) {
+    const v = src[key];
+    if (v === undefined || v === null) continue; // older file without this collection
+    if (!Array.isArray(v)) throw new DatabaseFileError(`Collection "${key}" is not an array`, filePath);
+    (out as any)[key] = v;
+  }
+  if (src.settings !== undefined && src.settings !== null) {
+    if (typeof src.settings !== 'object' || Array.isArray(src.settings)) {
+      throw new DatabaseFileError('"settings" is not an object', filePath);
+    }
+    out.settings = src.settings as Settings;
+  }
+  if (src.activeTimer !== undefined && src.activeTimer !== null) {
+    if (typeof src.activeTimer !== 'object' || Array.isArray(src.activeTimer)) {
+      throw new DatabaseFileError('"activeTimer" is not an object', filePath);
+    }
+    out.activeTimer = src.activeTimer as ActiveTimer;
+  }
+  return out;
+}
+
+export class Database {
+  private data: DatabaseSchema = emptySchema();
   private filePath: string;
+  private codec: StorageCodec;
   private initialized = false;
 
-  constructor(filePath?: string) {
-    this.filePath = filePath || path.join(process.cwd(), 'data', 'database.json');
+  constructor(filePath?: string, options: DatabaseOptions = {}) {
+    this.filePath = filePath || process.env.HEYW_DATA_FILE || DEFAULT_DATA_FILE();
+    this.codec = options.codec || jsonCodec;
   }
 
+  /** Absolute path of the backing file. */
+  get file(): string {
+    return this.filePath;
+  }
+
+  get isInitialized(): boolean {
+    return this.initialized;
+  }
+
+  /**
+   * Points the instance at a different file and drops in-memory state.
+   * Used by `createServer({ dataFile })` and by tests; must be followed by `init()`.
+   */
+  useFile(filePath: string, options: DatabaseOptions = {}): void {
+    this.filePath = filePath;
+    if (options.codec) this.codec = options.codec;
+    this.data = emptySchema();
+    this.initialized = false;
+  }
+
+  /**
+   * Loads the data file. A *missing* file is a fresh install and gets the welcome
+   * seed; an *unreadable or malformed* file is never overwritten — we refuse to
+   * start instead so that no data is lost (see workbook finding F4).
+   */
   async init(): Promise<void> {
     if (this.initialized) return;
+    const dir = path.dirname(this.filePath);
+    await fs.mkdir(dir, { recursive: true, mode: 0o700 });
+
+    let raw: Buffer | null = null;
     try {
-      const dir = path.dirname(this.filePath);
-      await fs.mkdir(dir, { recursive: true });
-      const raw = await fs.readFile(this.filePath, 'utf-8');
-      const parsed = JSON.parse(raw);
-      this.data = {
-        projects: parsed.projects || [],
-        tasks: parsed.tasks || [],
-        focusSessions: parsed.focusSessions || [],
-        dailyLogs: parsed.dailyLogs || [],
-        notes: parsed.notes || [],
-      };
-    } catch {
+      raw = await fs.readFile(this.filePath);
+    } catch (err: any) {
+      if (err?.code !== 'ENOENT') {
+        throw new DatabaseFileError(`Cannot read data file: ${err?.message || err}`, this.filePath);
+      }
+    }
+
+    if (raw === null) {
       // Initialize with seed data for a warm, ready-to-use first experience
       this.seedInitialData();
       await this.persist();
+    } else {
+      let parsed: unknown;
+      try {
+        parsed = this.codec.decode(raw);
+      } catch (err: any) {
+        throw new DatabaseFileError(
+          `Data file is corrupt or not in the expected format (${err?.message || err}). ` +
+          'The file was left untouched; fix or move it and start again.',
+          this.filePath,
+        );
+      }
+      this.data = normaliseSchema(parsed, this.filePath);
     }
     this.initialized = true;
   }
 
+  /**
+   * Atomic write: temp file + rename. Files are created owner-only (0600) so that
+   * other accounts on a shared machine cannot read the store (no-op on Windows).
+   */
   async persist(): Promise<void> {
     const dir = path.dirname(this.filePath);
-    await fs.mkdir(dir, { recursive: true });
+    await fs.mkdir(dir, { recursive: true, mode: 0o700 });
     const tempFile = `${this.filePath}.${crypto.randomUUID()}.tmp`;
-    await fs.writeFile(tempFile, JSON.stringify(this.data, null, 2), 'utf-8');
-    await fs.rename(tempFile, this.filePath);
+    try {
+      await fs.writeFile(tempFile, this.codec.encode(this.data), { mode: 0o600 });
+      await fs.rename(tempFile, this.filePath);
+    } catch (err) {
+      await fs.rm(tempFile, { force: true }).catch(() => {});
+      throw err;
+    }
+  }
+
+  /** Read-only snapshot of the whole store (used by summaries and tooling). */
+  snapshot(): Readonly<DatabaseSchema> {
+    return this.data;
+  }
+
+  /**
+   * In-memory instance over an existing schema object (tooling, reports, tests).
+   * Not backed by a file: `persist()` would write to the default path, so callers
+   * should treat it as read-only.
+   */
+  static fromSnapshot(data: DatabaseSchema): Database {
+    const db = new Database(path.join('/dev/null', 'in-memory.json'));
+    db.data = normaliseSchema(data);
+    db.initialized = true;
+    return db;
+  }
+
+  // ── Settings ──
+  getSettings(): Settings {
+    return { ...this.data.settings };
+  }
+
+  /** Remembers the client's zone so server-side jobs can bucket months the same way. Returns true when changed. */
+  rememberTimeZone(tz: string): boolean {
+    if (this.data.settings.timeZone === tz) return false;
+    this.data.settings.timeZone = tz;
+    return true;
   }
 
   private seedInitialData() {
@@ -309,22 +539,37 @@ export class Database {
       .slice(0, limit);
   }
 
-  logFocusSession(session: Omit<FocusSession, 'id' | 'timestamp'>): FocusSession {
+  /**
+   * Records a focus/break block. `timestamp` (block start) may be supplied by the
+   * timer engine; otherwise "now" is used. Task time is credited with the minutes
+   * actually spent, whether or not the planned duration was reached — a 20-minute
+   * block that was cut short is still 20 minutes of real work.
+   */
+  logFocusSession(session: Omit<FocusSession, 'id' | 'timestamp'> & { timestamp?: string }): FocusSession {
     const newSession: FocusSession = {
       ...session,
       id: crypto.randomUUID(),
-      timestamp: new Date().toISOString(),
+      timestamp: session.timestamp || new Date().toISOString(),
     };
     this.data.focusSessions.push(newSession);
 
-    // If attached to a task, credit the actual minutes
-    if (session.taskId && session.completed && session.type === 'focus') {
+    // If attached to a task, credit the minutes actually spent
+    if (session.taskId && session.type === 'focus' && session.durationMinutes > 0) {
       const task = this.data.tasks.find(t => t.id === session.taskId);
       if (task) {
         task.actualMinutes = (task.actualMinutes || 0) + session.durationMinutes;
       }
     }
     return newSession;
+  }
+
+  // ── Active timer ──
+  getActiveTimer(): ActiveTimer | null {
+    return this.data.activeTimer;
+  }
+
+  setActiveTimer(timer: ActiveTimer | null): void {
+    this.data.activeTimer = timer;
   }
 
   // ── Daily Logs ──
@@ -409,62 +654,153 @@ export class Database {
     return true;
   }
 
-  // ── Dashboard / Insights Summary ──
-  getDashboardSummary() {
-    const today = new Date().toISOString().slice(0, 10);
-    const todayTasks = this.data.tasks.filter(t => t.dueDate === today || t.status === 'in_progress');
-    const completedToday = this.data.tasks.filter(t => t.completedAt?.startsWith(today)).length;
+  // ── Thoughts (capture & triage) ──
+  //
+  // A thought is parked in one keystroke during a focus block and triaged later:
+  // turned into a task, kept for later, or discarded. Discarding only hides it —
+  // nothing is ever deleted, so a thought can always be brought back.
 
-    // Focus minutes today
-    const focusTodayMinutes = this.data.focusSessions
-      .filter(s => s.completed && s.type === 'focus' && s.timestamp.startsWith(today))
-      .reduce((sum, s) => sum + s.durationMinutes, 0);
+  getThoughts(filters?: { status?: ThoughtStatus }): Thought[] {
+    let result = [...this.data.thoughts];
+    if (filters?.status) result = result.filter(t => t.status === filters.status);
+    return result.sort((a, b) => b.capturedAt.localeCompare(a.capturedAt));
+  }
 
-    // Calculate daily streak (days with focus >= 1 session or at least 1 completed task)
-    const activeDates = new Set<string>();
-    this.data.focusSessions
-      .filter(s => s.completed && s.type === 'focus')
-      .forEach(s => activeDates.add(s.timestamp.slice(0, 10)));
-    this.data.tasks
-      .filter(t => t.completedAt)
-      .forEach(t => activeDates.add(t.completedAt!.slice(0, 10)));
+  getThought(id: string): Thought | undefined {
+    return this.data.thoughts.find(t => t.id === id);
+  }
 
-    let streak = 0;
-    const checkDate = new Date();
-    // Allow checking starting today, or yesterday if nothing done yet today
-    const checkStr = checkDate.toISOString().slice(0, 10);
-    if (!activeDates.has(checkStr)) {
-      checkDate.setDate(checkDate.getDate() - 1);
-    }
-    while (true) {
-      const dStr = checkDate.toISOString().slice(0, 10);
-      if (activeDates.has(dStr)) {
-        streak++;
-        checkDate.setDate(checkDate.getDate() - 1);
+  countThoughts(status: ThoughtStatus): number {
+    return this.data.thoughts.filter(t => t.status === status).length;
+  }
+
+  createThought(input: { text: string; context?: ThoughtContext }): Thought {
+    const thought: Thought = {
+      id: crypto.randomUUID(),
+      text: input.text,
+      status: 'inbox',
+      capturedAt: new Date().toISOString(),
+      context: input.context,
+    };
+    this.data.thoughts.push(thought);
+    return thought;
+  }
+
+  updateThought(id: string, updates: { text?: string; status?: ThoughtStatus }): Thought | null {
+    const thought = this.getThought(id);
+    if (!thought) return null;
+    if (typeof updates.text === 'string') thought.text = updates.text;
+    if (updates.status && updates.status !== thought.status) {
+      thought.status = updates.status;
+      // Coming back to the inbox means it is untriaged again.
+      if (updates.status === 'inbox') {
+        delete thought.reviewedAt;
       } else {
-        break;
+        thought.reviewedAt = new Date().toISOString();
       }
     }
+    return thought;
+  }
 
-    // Weekly focus time by last 7 days
+  /** Turns a thought into a task and links the two. */
+  convertThoughtToTask(
+    id: string,
+    taskInput: Partial<Omit<Task, 'id' | 'actualMinutes' | 'order' | 'createdAt'>> = {},
+  ): { thought: Thought; task: Task } | null {
+    const thought = this.getThought(id);
+    if (!thought) return null;
+    const task = this.createTask({
+      projectId: taskInput.projectId,
+      title: (taskInput.title || thought.text).trim(),
+      description: taskInput.description || '',
+      status: taskInput.status || 'todo',
+      priority: taskInput.priority || 'medium',
+      dueDate: taskInput.dueDate,
+      estimatedMinutes: taskInput.estimatedMinutes ?? 25,
+      tags: taskInput.tags || [],
+    });
+    thought.status = 'converted';
+    thought.taskId = task.id;
+    thought.reviewedAt = new Date().toISOString();
+    return { thought, task };
+  }
+
+  /** Tooling/test only: thoughts are never deleted through the UI. */
+  deleteThought(id: string): boolean {
+    const idx = this.data.thoughts.findIndex(t => t.id === id);
+    if (idx === -1) return false;
+    this.data.thoughts.splice(idx, 1);
+    return true;
+  }
+
+  // ── Monthly summaries (Book of Work archive) ──
+  getMonthlySummaryRecord(month: string): MonthlySummaryRecord | undefined {
+    return this.data.monthlySummaries.find(m => m.month === month);
+  }
+
+  getMonthlySummaryRecords(): MonthlySummaryRecord[] {
+    return [...this.data.monthlySummaries].sort((a, b) => b.month.localeCompare(a.month));
+  }
+
+  upsertMonthlySummary(record: Omit<MonthlySummaryRecord, 'id'>): MonthlySummaryRecord {
+    const existing = this.getMonthlySummaryRecord(record.month);
+    if (existing) {
+      Object.assign(existing, record);
+      return existing;
+    }
+    const created: MonthlySummaryRecord = { id: crypto.randomUUID(), ...record };
+    this.data.monthlySummaries.push(created);
+    return created;
+  }
+
+  // ── Dashboard / Insights Summary ──
+  /**
+   * Day buckets are computed in the caller's IANA zone (`tz`); instants stay UTC on disk.
+   * `now` is injectable for deterministic tests.
+   */
+  getDashboardSummary(tz: string = DEFAULT_TZ, now: Date = new Date()) {
+    const today = todayInZone(tz, now);
+    const sessionDay = (s: FocusSession) => dateInZone(s.timestamp, tz);
+    const completedDay = (t: Task) => (t.completedAt ? dateInZone(t.completedAt, tz) : undefined);
+
+    // Deep work = minutes actually spent in focus blocks (partial blocks included:
+    // `durationMinutes` is real elapsed time, `completed` only says whether the
+    // planned length was reached).
+    const deepWork = this.data.focusSessions.filter(s => s.type === 'focus' && s.durationMinutes > 0);
+
+    const todayTasks = this.data.tasks.filter(t => t.dueDate === today || t.status === 'in_progress');
+    const completedToday = this.data.tasks.filter(t => completedDay(t) === today).length;
+
+    // Focus minutes today
+    const focusTodayMinutes = deepWork
+      .filter(s => sessionDay(s) === today)
+      .reduce((sum, s) => sum + s.durationMinutes, 0);
+
+    // Daily streak: days with at least one completed focus session or one completed task
+    const activeDates = new Set<string>();
+    deepWork.forEach(s => activeDates.add(sessionDay(s)));
+    this.data.tasks.forEach(t => {
+      const d = completedDay(t);
+      if (d) activeDates.add(d);
+    });
+
+    // Start from today, or yesterday if nothing has been done yet today
+    let cursor = activeDates.has(today) ? today : addDays(today, -1);
+    let streak = 0;
+    while (activeDates.has(cursor)) {
+      streak++;
+      cursor = addDays(cursor, -1);
+    }
+
+    // Focus time over the last 7 days (today inclusive)
     const last7Days: { date: string; day: string; focusMinutes: number; completedTasks: number }[] = [];
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     for (let i = 6; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      const dStr = d.toISOString().slice(0, 10);
-      const mins = this.data.focusSessions
-        .filter(s => s.completed && s.type === 'focus' && s.timestamp.startsWith(dStr))
+      const dStr = addDays(today, -i);
+      const mins = deepWork
+        .filter(s => sessionDay(s) === dStr)
         .reduce((sum, s) => sum + s.durationMinutes, 0);
-      const tasksCount = this.data.tasks
-        .filter(t => t.completedAt?.startsWith(dStr))
-        .length;
-      last7Days.push({
-        date: dStr,
-        day: dayNames[d.getDay()],
-        focusMinutes: mins,
-        completedTasks: tasksCount,
-      });
+      const tasksCount = this.data.tasks.filter(t => completedDay(t) === dStr).length;
+      last7Days.push({ date: dStr, day: DAY_NAMES[dayOfWeek(dStr)], focusMinutes: mins, completedTasks: tasksCount });
     }
 
     // Task counts by status
@@ -477,6 +813,7 @@ export class Database {
 
     return {
       today,
+      timeZone: tz,
       todayTasks,
       completedToday,
       focusTodayMinutes,
@@ -485,6 +822,7 @@ export class Database {
       statusCounts,
       totalProjects: this.data.projects.filter(p => !p.archived).length,
       totalNotes: this.data.notes.length,
+      inboxCount: this.data.thoughts.filter(t => t.status === 'inbox').length,
       todayLog: this.getDailyLog(today) || null,
     };
   }

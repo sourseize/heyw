@@ -51,9 +51,12 @@ export class Router {
   }
 
   async handle(req: http.IncomingMessage, res: http.ServerResponse) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    // Privacy: the SPA is same-origin, so no CORS headers are ever emitted. Without
+    // them, browsers block cross-origin reads of the API (e.g. from a random website
+    // open in another tab). Pre-flight requests are answered with 204 but carry no
+    // allow-headers, so the actual cross-origin request is refused by the browser.
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Referrer-Policy', 'no-referrer');
 
     if (req.method === 'OPTIONS') {
       res.writeHead(204);
@@ -68,6 +71,15 @@ export class Router {
     // Static assets
     if (!pathname.startsWith('/api/')) {
       return this.serveStatic(req, res, pathname);
+    }
+
+    // Belt and braces against cross-site writes: browsers always attach `Origin`
+    // to POST/PUT/DELETE. If it is present it must match the host we were asked for.
+    // Non-browser clients (curl, tests) send no Origin and are unaffected.
+    if (req.method !== 'GET' && req.method !== 'HEAD' && !this.isSameOrigin(req)) {
+      res.writeHead(403, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Cross-origin requests are not allowed' }));
+      return;
     }
 
     // Body parsing for JSON
@@ -94,6 +106,17 @@ export class Router {
 
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Endpoint not found' }));
+  }
+
+  private isSameOrigin(req: http.IncomingMessage): boolean {
+    const origin = req.headers.origin;
+    if (!origin) return true;
+    if (req.headers['sec-fetch-site'] === 'cross-site') return false;
+    try {
+      return new URL(origin).host === (req.headers.host || '');
+    } catch {
+      return false;
+    }
   }
 
   private async parseBody(req: http.IncomingMessage): Promise<any> {

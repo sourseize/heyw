@@ -1,7 +1,7 @@
 {
   "name": "heyw",
   "version": "1.0.0",
-  "description": "HeyWork — A calm, local-first personal work, focus & journaling OS",
+  "description": "HeyWork \u2014 A calm, local-first personal work, focus & journaling OS",
   "private": true,
   "type": "module",
   "bin": {
@@ -10,8 +10,19 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
+    "start:test": "HEYW_DATA_FILE=data/test-database.json node dist/server.js",
     "dev": "npx tsx src/server.ts",
-    "test": "node --test dist/test/*.test.js"
+    "test": "node --test dist/test/unit/*.test.js dist/test/api/*.test.js",
+    "test:e2e": "node --test dist/test/e2e/*.test.js",
+    "test:ui": "node --test dist/test/ui/*.test.js",
+    "test:all": "npm run build && node scripts/test-all.mjs",
+    "backup": "node dist/tools/backup-cli.js",
+    "testdata": "node dist/tools/testdata/cli.js",
+    "testdata:seed": "node dist/tools/testdata/cli.js seed",
+    "testdata:clean": "node dist/tools/testdata/cli.js clean",
+    "testdata:status": "node dist/tools/testdata/cli.js status",
+    "testdata:report": "node dist/tools/testdata/cli.js report",
+    "test:update-golden": "npm run build && node scripts/update-goldens.mjs"
   },
   "keywords": [
     "heywork",
@@ -28,6 +39,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "playwright": "^1.56.1",
     "typescript": "^5.0.0"
   }
 }

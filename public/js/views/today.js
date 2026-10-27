@@ -1,16 +1,37 @@
 // ── HeyWork: Today & Focus View ──
+//
+// The timer is owned by the server (js/timer.js); this card is its main control
+// surface. The tabs are the three block types:
+//   - the tab of the *running* block ticks and offers Pause / Resume, Stop, Reset;
+//   - any other tab shows its static length and a "Start ‹block›" button — the
+//     only action that ends the running block (recorded, never discarded) and
+//     starts a new one.
+// The same block also shows in the corner countdown on every view.
 const TodayView = {
-  timer: null,
-  timeLeft: 25 * 60,
-  durationMinutes: 25,
-  timerType: 'focus', // focus | short_break | long_break
-  isRunning: false,
+  // Tab picked by the user; null means "follow the running block".
+  selectedType: null,
   selectedTaskId: null,
+  unsubscribe: null,
+
+  DURATIONS: { focus: 25, short_break: 5, long_break: 15 },
 
   async render(container) {
     const summary = await API.getDashboard();
     const tasks = await API.getTasks();
     const activeTasks = tasks.filter(t => t.status !== 'done');
+
+    const active = FocusTimer.state;
+    const displayType = this.displayType(active);
+    const onRunningTab = this.onRunningTab(active);
+    const timeText = onRunningTab ? FocusTimer.formatRemaining() : this.formatTime(this.DURATIONS[displayType] * 60);
+    const taskForSelect = onRunningTab ? (active.taskId || '') : (this.selectedTaskId || '');
+
+    // A re-render must never swallow a thought being typed: keep the draft (and
+    // the caret) across repaints triggered by the timer.
+    const draftInput = container.querySelector('#focus-capture-input');
+    const draft = draftInput ? draftInput.value : '';
+    const draftFocused = Boolean(draftInput && document.activeElement === draftInput);
+    const draftCaret = draftInput ? draftInput.selectionStart : 0;
 
     container.innerHTML = `
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;max-width:1100px;margin:0 auto">
@@ -18,25 +39,31 @@ const TodayView = {
         <div>
           <div class="focus-card">
             <div class="timer-tabs">
-              <div class="timer-tab ${this.timerType === 'focus' ? 'active' : ''}" data-type="focus" data-mins="25">Deep Focus (25m)</div>
-              <div class="timer-tab ${this.timerType === 'short_break' ? 'active' : ''}" data-type="short_break" data-mins="5">Short Break (5m)</div>
-              <div class="timer-tab ${this.timerType === 'long_break' ? 'active' : ''}" data-type="long_break" data-mins="15">Rest (15m)</div>
+              ${[['focus', 'Deep Focus'], ['short_break', 'Short Break'], ['long_break', 'Rest']].map(([type, label]) => `
+                <div class="timer-tab ${displayType === type ? 'active' : ''}" data-type="${type}" data-mins="${this.DURATIONS[type]}" data-testid="tab-${type}">${label} (${this.DURATIONS[type]}m)</div>`).join('')}
             </div>
 
             <div style="margin-bottom:0.75rem">
-              <select id="focus-task-select" style="padding:0.4rem 0.75rem;border-radius:var(--radius-sm);border:1px solid var(--border-light);background:var(--bg-surface);color:var(--text-primary);font-size:0.88rem;max-width:280px">
+              <select id="focus-task-select" data-testid="focus-task-select" ${onRunningTab ? 'disabled title="Attached to the running block"' : ''} style="padding:0.4rem 0.75rem;border-radius:var(--radius-sm);border:1px solid var(--border-light);background:var(--bg-surface);color:var(--text-primary);font-size:0.88rem;max-width:280px">
                 <option value="">-- No specific task attached --</option>
-                ${activeTasks.map(t => `<option value="${t.id}" ${t.id === this.selectedTaskId ? 'selected' : ''}>${escapeHtml(t.title)}</option>`).join('')}
+                ${activeTasks.map(t => `<option value="${t.id}" ${t.id === taskForSelect ? 'selected' : ''}>${escapeHtml(t.title)}</option>`).join('')}
+                ${onRunningTab && active.taskId && !activeTasks.some(t => t.id === active.taskId) ? `<option value="${active.taskId}" selected>${escapeHtml(active.taskTitle || 'Attached task')}</option>` : ''}
               </select>
             </div>
 
-            <div class="timer-display" id="timer-display">${this.formatTime(this.timeLeft)}</div>
+            <div class="timer-display" id="timer-display" data-testid="timer-display">${timeText}</div>
 
-            <div class="timer-controls">
-              <button class="btn btn-primary" id="timer-toggle-btn" style="min-width:120px;font-size:1rem;padding:0.65rem 1.25rem">
-                ${this.isRunning ? '⏸ Pause' : '▶ Start Flow'}
-              </button>
-              <button class="btn btn-secondary" id="timer-reset-btn">↺ Reset</button>
+            <div class="timer-status" id="timer-status" data-testid="timer-status" style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.75rem;min-height:1.1em">
+              ${this.statusText(active)}
+            </div>
+
+            <div class="timer-controls" id="timer-controls">
+              ${this.controlsHtml(active)}
+            </div>
+
+            <div class="focus-capture" data-testid="focus-capture">
+              <input type="text" id="focus-capture-input" data-testid="focus-capture-input" maxlength="500"
+                     placeholder="Park a thought… (Enter) — the timer keeps running" autocomplete="off">
             </div>
 
             <div class="ambient-sound-bar">
@@ -45,6 +72,7 @@ const TodayView = {
               <button class="sound-btn ${AmbientAudio.activeType === 'rain' ? 'active' : ''}" data-sound="rain">🌧 Rain</button>
               <button class="sound-btn ${AmbientAudio.activeType === 'brown' ? 'active' : ''}" data-sound="brown">🌊 Brown Noise</button>
               <button class="sound-btn ${AmbientAudio.activeType === 'white' ? 'active' : ''}" data-sound="white">📻 White Noise</button>
+              <span style="font-size:0.72rem;color:var(--text-muted);margin-left:auto">Press S</span>
             </div>
           </div>
         </div>
@@ -75,7 +103,7 @@ const TodayView = {
           <div style="margin-top:1.5rem;padding:1.25rem;background:var(--bg-surface);border:1px solid var(--border-light);border-radius:var(--radius-md)">
             <h3 style="font-size:0.95rem;font-weight:600;margin-bottom:0.5rem">Today's Metrics</h3>
             <div style="display:flex;justify-content:space-between;font-size:0.85rem;color:var(--text-secondary)">
-              <span>Focused Today: <strong style="color:var(--text-primary)">${summary.focusTodayMinutes}m</strong></span>
+              <span>Focused Today: <strong style="color:var(--text-primary)" data-testid="metric-focus-today">${summary.focusTodayMinutes}m</strong></span>
               <span>Completed Tasks: <strong style="color:var(--text-primary)">${summary.completedToday}</strong></span>
               <span>Current Streak: <strong style="color:var(--accent)">${summary.streak} days</strong></span>
             </div>
@@ -84,7 +112,98 @@ const TodayView = {
       </div>
     `;
 
+    const restored = container.querySelector('#focus-capture-input');
+    if (restored && draft) {
+      restored.value = draft;
+      if (draftFocused) {
+        restored.focus();
+        restored.setSelectionRange(draftCaret, draftCaret);
+      }
+    }
+
     this.bindEvents(container);
+    this.subscribe(container);
+  },
+
+  /** Keeps the big countdown in step with the server-owned timer. */
+  subscribe(container) {
+    this.container = container;
+    if (this.unsubscribe) this.unsubscribe();
+    this.unsubscribe = FocusTimer.onChange((state, previous) => {
+      // The shell reuses one #page-content element, so "still in the DOM" is not
+      // enough: stop as soon as another view owns the page.
+      const stillMine = document.body.contains(container)
+        && (typeof App === 'undefined' || App.currentView === 'today')
+        && container.querySelector('#timer-display');
+      if (!stillMine) {
+        this.unsubscribe?.();
+        this.unsubscribe = null;
+        return;
+      }
+      const changedBlock = Boolean(previous) !== Boolean(state) || (state && previous && state.id !== previous.id);
+      const changedRunning = state && previous && state.running !== previous.running;
+      if (changedBlock) {
+        // A block started or ended: controls and today's metrics change.
+        if (!state) this.selectedType = null;
+        this.render(container);
+        return;
+      }
+      if (changedRunning) {
+        const controls = container.querySelector('#timer-controls');
+        if (controls) {
+          controls.innerHTML = this.controlsHtml(state);
+          this.bindControls(container);
+        }
+      }
+      this.paint(container, state);
+    });
+  },
+
+  displayType(state) {
+    return this.selectedType || (state ? state.type : 'focus');
+  },
+
+  /** True when the card is showing the block that is actually running/paused. */
+  onRunningTab(state) {
+    return Boolean(state) && this.displayType(state) === state.type;
+  },
+
+  controlsHtml(state) {
+    const popout = '<button class="btn btn-secondary" id="timer-popout-btn" data-testid="timer-popout" title="Pop out the countdown into a small window">⧉ Pop out</button>';
+    if (!state) {
+      return `<button class="btn btn-primary" id="timer-toggle-btn" data-testid="timer-toggle" style="min-width:120px;font-size:1rem;padding:0.65rem 1.25rem">▶ Start Flow</button>${popout}`;
+    }
+    if (this.onRunningTab(state)) {
+      return `
+        <button class="btn btn-primary" id="timer-toggle-btn" data-testid="timer-toggle" style="min-width:120px;font-size:1rem;padding:0.65rem 1.25rem">${state.running ? '⏸ Pause' : '▶ Resume'}</button>
+        <button class="btn btn-secondary" id="timer-stop-btn" data-testid="timer-stop" title="End this block and record the time spent">■ Stop</button>
+        <button class="btn btn-secondary" id="timer-reset-btn" data-testid="timer-reset" title="Restart this block from the top (what was done so far is recorded)">↺ Reset</button>
+        ${popout}`;
+    }
+    const label = FocusTimer.typeLabel(this.displayType(state));
+    return `
+      <button class="btn btn-primary" id="timer-switch-btn" data-testid="timer-switch" style="min-width:120px;font-size:1rem;padding:0.65rem 1.25rem" title="Records the running ${FocusTimer.typeLabel(state.type)} block, then starts ${label}">▶ Start ${label}</button>
+      ${popout}`;
+  },
+
+  /** Per-tick update for the running tab: digits, status line and the pause label. */
+  paint(container, state) {
+    const status = container.querySelector('#timer-status');
+    if (status) status.textContent = this.statusText(state);
+    if (!this.onRunningTab(state)) return;
+    const display = container.querySelector('#timer-display');
+    if (display) display.textContent = FocusTimer.formatRemaining();
+    const toggle = container.querySelector('#timer-toggle-btn');
+    if (toggle) toggle.textContent = state.running ? '⏸ Pause' : '▶ Resume';
+  },
+
+  statusText(state) {
+    const shown = this.displayType(state);
+    if (!state) return `Ready: ${FocusTimer.typeLabel(shown)} · ${this.DURATIONS[shown]}m.`;
+    const elapsed = Math.floor(FocusTimer.elapsedMs() / 60000);
+    const running = `${FocusTimer.typeLabel(state.type)} ${state.running ? 'running' : 'paused'} · ${elapsed}m of ${state.plannedMinutes}m`;
+    if (this.onRunningTab(state)) return running;
+    return `${running}. “Start ${FocusTimer.typeLabel(shown)}” records it first, then begins ${this.DURATIONS[shown]}m of ${FocusTimer.typeLabel(shown)}.`;
   },
 
   formatTime(seconds) {
@@ -93,40 +212,84 @@ const TodayView = {
     return `${m}:${s}`;
   },
 
+  bindControls(container) {
+    const fail = (err, what) => showToast(err.message || `Could not ${what}`, 'error');
+
+    container.querySelector('#timer-toggle-btn')?.addEventListener('click', async () => {
+      const state = FocusTimer.state;
+      try {
+        if (!state) {
+          const type = this.displayType(null);
+          await FocusTimer.start(type, this.DURATIONS[type], this.selectedTaskId);
+          this.selectedType = null;
+        } else if (state.running) {
+          await FocusTimer.pause();
+        } else {
+          await FocusTimer.resume();
+        }
+      } catch (err) {
+        fail(err, 'update the timer');
+      }
+    });
+
+    container.querySelector('#timer-stop-btn')?.addEventListener('click', async () => {
+      try {
+        await FocusTimer.stop();
+      } catch (err) {
+        fail(err, 'stop the block');
+      }
+    });
+
+    container.querySelector('#timer-reset-btn')?.addEventListener('click', async () => {
+      try {
+        await FocusTimer.reset();
+        this.selectedType = null;
+      } catch (err) {
+        fail(err, 'reset the block');
+      }
+    });
+
+    container.querySelector('#timer-switch-btn')?.addEventListener('click', async () => {
+      const type = this.displayType(FocusTimer.state);
+      try {
+        // The one place a running block is replaced: recorded as `switched`, then the new one starts.
+        await FocusTimer.start(type, this.DURATIONS[type], this.selectedTaskId);
+        this.selectedType = null;
+      } catch (err) {
+        fail(err, 'switch block');
+      }
+    });
+
+    container.querySelector('#timer-popout-btn')?.addEventListener('click', () => FocusTimer.popOut());
+  },
+
   bindEvents(container) {
-    const toggleBtn = container.querySelector('#timer-toggle-btn');
-    const resetBtn = container.querySelector('#timer-reset-btn');
-    const display = container.querySelector('#timer-display');
     const taskSelect = container.querySelector('#focus-task-select');
 
     taskSelect?.addEventListener('change', (e) => {
       this.selectedTaskId = e.target.value || null;
     });
 
-    toggleBtn?.addEventListener('click', () => {
-      if (this.isRunning) {
-        this.pause();
-        toggleBtn.textContent = '▶ Resume Flow';
-      } else {
-        this.start();
-        toggleBtn.textContent = '⏸ Pause';
-      }
-    });
-
-    resetBtn?.addEventListener('click', () => {
-      this.reset();
-      toggleBtn.textContent = '▶ Start Flow';
-    });
+    this.bindControls(container);
 
     container.querySelectorAll('.timer-tab').forEach(tab => {
       tab.addEventListener('click', () => {
-        container.querySelectorAll('.timer-tab').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        this.timerType = tab.dataset.type;
-        this.durationMinutes = parseInt(tab.dataset.mins, 10);
-        this.reset();
-        toggleBtn.textContent = '▶ Start Flow';
+        // Selection only. Picking the running block's tab goes back to following it.
+        const state = FocusTimer.state;
+        this.selectedType = state && tab.dataset.type === state.type ? null : tab.dataset.type;
+        this.render(container);
       });
+    });
+
+    // Capturing a thought must never interrupt the block: no modal, no re-render,
+    // no focus stealing. Type, press Enter, carry on.
+    const captureInput = container.querySelector('#focus-capture-input');
+    captureInput?.addEventListener('keydown', async (e) => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      const value = captureInput.value;
+      captureInput.value = '';
+      await ThoughtCapture.capture(value);
     });
 
     container.querySelectorAll('.sound-btn').forEach(btn => {
@@ -177,48 +340,4 @@ const TodayView = {
       });
     });
   },
-
-  start() {
-    if (this.isRunning) return;
-    this.isRunning = true;
-    this.timer = setInterval(() => {
-      if (this.timeLeft > 0) {
-        this.timeLeft--;
-        const display = document.getElementById('timer-display');
-        if (display) display.textContent = this.formatTime(this.timeLeft);
-      } else {
-        this.completeSession();
-      }
-    }, 1000);
-  },
-
-  pause() {
-    this.isRunning = false;
-    if (this.timer) clearInterval(this.timer);
-  },
-
-  reset() {
-    this.pause();
-    this.timeLeft = this.durationMinutes * 60;
-    const display = document.getElementById('timer-display');
-    if (display) display.textContent = this.formatTime(this.timeLeft);
-  },
-
-  async completeSession() {
-    this.reset();
-    AmbientAudio.playChime();
-    try {
-      await API.logFocusSession({
-        durationMinutes: this.durationMinutes,
-        type: this.timerType,
-        taskId: this.selectedTaskId || undefined,
-        completed: true,
-      });
-      showToast('Focus session complete! Take a mindful breath.', 'success');
-      const container = document.getElementById('page-content');
-      if (container) this.render(container);
-    } catch (err) {
-      console.error(err);
-    }
-  }
 };

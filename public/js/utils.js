@@ -7,6 +7,14 @@ function $$(selector) {
   return document.querySelectorAll(selector);
 }
 
+/** Today's date as YYYY-MM-DD in the browser's local time zone (not UTC). */
+function localDateStr(date = new Date()) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 function escapeHtml(str) {
   if (!str) return '';
   const div = document.createElement('div');
@@ -29,42 +37,83 @@ function showToast(message, type = 'info') {
   }, 3000);
 }
 
-function showModal(title, bodyHtml, onConfirm) {
+/**
+ * Application modal. `options`: { confirmLabel, cancelLabel, danger, onCancel }.
+ * `onConfirm` may return false to keep the modal open (e.g. validation failed).
+ */
+function showModal(title, bodyHtml, onConfirm, options = {}) {
   const existing = document.querySelector('.modal-overlay');
   if (existing) existing.remove();
 
+  const confirmLabel = options.confirmLabel || 'Confirm';
+  const cancelLabel = options.cancelLabel || 'Cancel';
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay';
+  overlay.setAttribute('data-testid', 'modal');
   overlay.innerHTML = `
-    <div class="modal-content">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modal-title">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
-        <h3 style="font-size:1.15rem;font-weight:700">${escapeHtml(title)}</h3>
-        <button class="btn btn-secondary btn-sm close-modal-btn" style="border:none;font-size:1.1rem;padding:0.2rem 0.5rem">✕</button>
+        <h3 id="modal-title" style="font-size:1.15rem;font-weight:700">${escapeHtml(title)}</h3>
+        <button class="btn btn-secondary btn-sm close-modal-btn" style="border:none;font-size:1.1rem;padding:0.2rem 0.5rem" aria-label="Close">✕</button>
       </div>
       <div class="modal-body">${bodyHtml}</div>
       <div style="display:flex;justify-content:flex-end;gap:0.75rem;margin-top:1.5rem">
-        <button class="btn btn-secondary cancel-modal-btn">Cancel</button>
-        <button class="btn btn-primary confirm-modal-btn">Confirm</button>
+        <button class="btn btn-secondary cancel-modal-btn" data-testid="modal-cancel">${escapeHtml(cancelLabel)}</button>
+        <button class="btn ${options.danger ? 'btn-danger' : 'btn-primary'} confirm-modal-btn" data-testid="modal-confirm">${escapeHtml(confirmLabel)}</button>
       </div>
     </div>
   `;
 
   document.body.appendChild(overlay);
 
-  const close = () => overlay.remove();
-  overlay.querySelector('.close-modal-btn').addEventListener('click', close);
-  overlay.querySelector('.cancel-modal-btn').addEventListener('click', close);
+  let settled = false;
+  const close = (cancelled) => {
+    overlay.remove();
+    document.removeEventListener('keydown', onKey);
+    if (cancelled && !settled && options.onCancel) options.onCancel();
+    settled = true;
+  };
+  const onKey = (e) => {
+    if (e.key === 'Escape') close(true);
+  };
+  document.addEventListener('keydown', onKey);
+
+  overlay.querySelector('.close-modal-btn').addEventListener('click', () => close(true));
+  overlay.querySelector('.cancel-modal-btn').addEventListener('click', () => close(true));
   overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) close();
+    if (e.target === overlay) close(true);
   });
 
   overlay.querySelector('.confirm-modal-btn').addEventListener('click', async () => {
     if (onConfirm) {
       const shouldClose = await onConfirm();
-      if (shouldClose !== false) close();
+      if (shouldClose !== false) close(false);
     } else {
-      close();
+      close(false);
     }
+  });
+
+  // Focus the first field, or the confirm button, so the keyboard works straight away
+  const firstField = overlay.querySelector('input, textarea, select');
+  (firstField || overlay.querySelector('.confirm-modal-btn')).focus();
+  return overlay;
+}
+
+/**
+ * In-app replacement for window.confirm(). Resolves true when confirmed.
+ * `options`: { confirmLabel = 'Confirm', danger = false }.
+ */
+function showConfirm(title, message, options = {}) {
+  return new Promise(resolve => {
+    showModal(
+      title,
+      `<p style="font-size:0.92rem;color:var(--text-secondary);line-height:1.5" data-testid="confirm-message">${escapeHtml(message)}</p>`,
+      () => {
+        resolve(true);
+        return true;
+      },
+      { confirmLabel: options.confirmLabel || 'Confirm', danger: Boolean(options.danger), onCancel: () => resolve(false) },
+    );
   });
 }
 

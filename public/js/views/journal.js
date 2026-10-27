@@ -1,6 +1,6 @@
 // ── HeyWork: Daily Journal & Retrospective View ──
 const JournalView = {
-  currentDate: new Date().toISOString().slice(0, 10),
+  currentDate: localDateStr(),
 
   async render(container) {
     let log = null;

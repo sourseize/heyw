@@ -95,7 +95,8 @@ const NotesView = {
 
     container.querySelector('#delete-note-btn')?.addEventListener('click', async () => {
       if (!currentNote) return;
-      if (confirm('Delete this note?')) {
+      const ok = await showConfirm('Delete this note?', `“${currentNote.title}” will be deleted. This cannot be undone (your rotating backups still hold earlier copies).`, { confirmLabel: 'Delete', danger: true });
+      if (ok) {
         await API.deleteNote(currentNote.id);
         this.selectedNoteId = null;
         showToast('Note deleted');

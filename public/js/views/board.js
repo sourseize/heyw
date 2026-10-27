@@ -129,7 +129,9 @@ const BoardView = {
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
         const id = btn.dataset.id;
-        if (confirm('Delete this task?')) {
+        const task = tasks.find(t => t.id === id);
+        const ok = await showConfirm('Delete this task?', `“${task ? task.title : 'This task'}” will be removed from the board. Focus time already logged against it stays in your history.`, { confirmLabel: 'Delete', danger: true });
+        if (ok) {
           await API.deleteTask(id);
           showToast('Task deleted');
           this.render(container);

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HeyWork Timer</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⏳</text></svg>">
+</head>
+<body class="popout-body">
+  <div class="popout" id="popout" data-testid="popout">
+    <div class="popout-type" id="popout-type" data-testid="popout-type">No timer running</div>
+    <div class="popout-time" id="popout-time" data-testid="popout-time">--:--</div>
+    <div class="popout-task" id="popout-task" data-testid="popout-task"></div>
+    <div class="popout-actions">
+      <button class="btn btn-primary btn-sm" id="popout-toggle" data-testid="popout-toggle">Pause</button>
+      <button class="btn btn-secondary btn-sm" id="popout-stop" data-testid="popout-stop">Stop</button>
+    </div>
+  </div>
+  <script src="/js/sound.js"></script>
+  <script src="/js/timer.js"></script>
+  <script src="/js/popout.js"></script>
+</body>
+</html>

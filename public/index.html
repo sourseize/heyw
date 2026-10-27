@@ -35,6 +35,11 @@
           <span>📖</span>
           <span>Daily Journal</span>
         </a>
+        <a class="nav-item" data-page="inbox" data-testid="nav-inbox">
+          <span>🧠</span>
+          <span>Thought Inbox</span>
+          <span class="nav-badge" id="inbox-badge" data-testid="inbox-badge" hidden>0</span>
+        </a>
         <a class="nav-item" data-page="notes">
           <span>📝</span>
           <span>Notes & Ideas</span>
@@ -42,6 +47,10 @@
         <a class="nav-item" data-page="insights">
           <span>📊</span>
           <span>Insights</span>
+        </a>
+        <a class="nav-item" data-page="bookofwork" data-testid="nav-bookofwork">
+          <span>📘</span>
+          <span>Book of Work</span>
         </a>
       </div>
 
@@ -70,17 +79,31 @@
     </main>
   </div>
 
+  <!-- Park a thought from anywhere: P opens this, Enter saves, Esc closes -->
+  <div id="capture-bar" class="capture-bar" data-testid="capture-bar" hidden>
+    <span class="capture-bar-icon">🧠</span>
+    <input type="text" id="capture-bar-input" data-testid="capture-bar-input" maxlength="500"
+           placeholder="Park a thought… (Enter to save, Esc to close)" autocomplete="off">
+    <span class="capture-bar-hint">it goes to your Thought Inbox</span>
+  </div>
+
+  <!-- Always-visible countdown for the running block (hidden on the Focus view) -->
+  <div id="mini-timer" class="mini-timer" data-testid="mini-timer" hidden></div>
+
   <div id="toast-container" class="toast-container"></div>
 
   <!-- Scripts -->
   <script src="/js/utils.js"></script>
   <script src="/js/sound.js"></script>
+  <script src="/js/timer.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/views/today.js"></script>
   <script src="/js/views/board.js"></script>
   <script src="/js/views/journal.js"></script>
+  <script src="/js/views/inbox.js"></script>
   <script src="/js/views/notes.js"></script>
   <script src="/js/views/insights.js"></script>
+  <script src="/js/views/bookofwork.js"></script>
   <script src="/js/app.js"></script>
 </body>
 </html>

@@ -1,5 +1,17 @@
 // ── HeyWork: Client API ──
 const API = {
+  /**
+   * The browser's IANA time zone. Instants are stored in UTC on the server; any
+   * endpoint that buckets by day/month receives this so "today" means *your* today.
+   */
+  get timeZone() {
+    try {
+      return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+    } catch {
+      return 'UTC';
+    }
+  },
+
   async request(method, path, body) {
     const opts = {
       method,
@@ -16,7 +28,7 @@ const API = {
 
   // Dashboard
   getDashboard() {
-    return this.request('GET', '/api/dashboard');
+    return this.request('GET', `/api/dashboard?tz=${encodeURIComponent(this.timeZone)}`);
   },
 
   // Projects
@@ -68,6 +80,35 @@ const API = {
   },
   saveDailyLog(data) {
     return this.request('POST', '/api/logs', data);
+  },
+
+  // Thoughts (capture & triage)
+  getThoughts(status) {
+    const params = new URLSearchParams();
+    if (status) params.set('status', status);
+    return this.request('GET', `/api/thoughts?${params.toString()}`);
+  },
+  captureThought(text, context) {
+    return this.request('POST', '/api/thoughts', { text, context });
+  },
+  updateThought(id, data) {
+    return this.request('PUT', `/api/thoughts/${id}`, data);
+  },
+  convertThought(id, taskData = {}) {
+    return this.request('POST', `/api/thoughts/${id}/convert`, taskData);
+  },
+
+  // Book of Work
+  getSummaryMonths() {
+    return this.request('GET', `/api/summary/months?tz=${encodeURIComponent(this.timeZone)}`);
+  },
+  getMonthlySummary(month) {
+    const params = new URLSearchParams({ tz: this.timeZone });
+    if (month) params.set('month', month);
+    return this.request('GET', `/api/summary/monthly?${params.toString()}`);
+  },
+  freezeMonth(month) {
+    return this.request('POST', `/api/summary/monthly/${month}/freeze?tz=${encodeURIComponent(this.timeZone)}`);
   },
 
   // Notes

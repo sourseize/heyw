@@ -5,6 +5,31 @@ const AmbientAudio = {
   activeType: null,
   gainNode: null,
 
+  /** Order used by the `S` shortcut: off → rain → brown → white → off. */
+  CYCLE: [null, 'rain', 'brown', 'white'],
+
+  LABELS: {
+    rain: '🌧 Gentle Rain',
+    brown: '🌊 Brown Noise',
+    white: '📻 White Noise',
+  },
+
+  label(type) {
+    return this.LABELS[type] || 'Soundscape off';
+  },
+
+  /** Advances to the next soundscape and returns the new type (null = off). */
+  cycle() {
+    const index = this.CYCLE.indexOf(this.activeType);
+    const next = this.CYCLE[(index + 1) % this.CYCLE.length];
+    if (next === null) {
+      this.stop();
+    } else {
+      this.play(next);
+    }
+    return this.activeType;
+  },
+
   init() {
     if (!this.ctx) {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
