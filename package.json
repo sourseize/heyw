@@ -16,6 +16,7 @@
     "test:e2e": "node --test dist/test/e2e/*.test.js",
     "test:ui": "node --test dist/test/ui/*.test.js",
     "test:all": "npm run build && node scripts/test-all.mjs",
+    "test:quiet": "npm run build && node scripts/test-all.mjs --quiet",
     "backup": "node dist/tools/backup-cli.js",
     "testdata": "node dist/tools/testdata/cli.js",
     "testdata:seed": "node dist/tools/testdata/cli.js seed",

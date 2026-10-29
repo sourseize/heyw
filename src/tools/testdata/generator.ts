@@ -16,9 +16,11 @@
  * the date, so ids are stable too. Nothing here touches the file system.
  */
 import type {
-  DailyLog, DatabaseSchema, FocusSession, Note, Project, SessionEndReason, Task, TaskPriority, TaskStatus, Thought,
+  DailyLog, DatabaseSchema, FocusSession, Link, Note, Project, SessionEndReason, Task, TaskPriority, TaskStatus, Thought,
 } from '../../db/database.js';
 import { emptySchema } from '../../db/database.js';
+import { buildMentionIndex } from '../../db/links.js';
+import { getBacklinks } from '../../db/graph.js';
 import { addDays, addMonths, dayOfWeek, isValidDateString, todayInZone } from '../../db/time.js';
 import { Prng, seedFor, testDataId, TESTDATA_NAMESPACE } from './prng.js';
 import { INTENTIONS, NOTES, PROJECTS, RETROS, SESSION_NOTES, TAGS, THOUGHTS, UNASSIGNED_TASKS } from './content.js';
@@ -57,6 +59,8 @@ export interface Manifest {
     incompleteSessionId: string | null;
     lateNightSessionIds: string[];
     emptyMonth: string;
+    /** Note with the most connections (mentions in either direction + explicit links). */
+    mostConnectedNoteId: string | null;
   };
 }
 
@@ -65,6 +69,8 @@ export const DEFAULT_SEED = 20240101;
 export const PROFILE_MONTHS_BACK: Record<Profile, number> = { small: 0, standard: 3, large: 12 };
 const WARMUP_DAYS = 45;
 const ATTACH_WINDOW_DAYS = 30;
+/** Mentions and links only reach back this far, so the choice never depends on where generation started. */
+const MENTION_WINDOW_DAYS = 30;
 
 const PRIORITIES: TaskPriority[] = ['low', 'medium', 'high', 'urgent'];
 
@@ -124,6 +130,9 @@ export function generateDataset(options: GeneratorOptions = {}): { data: Databas
   const logs: DailyLog[] = [];
   const notes: Note[] = [];
   const thoughts: Thought[] = [];
+  const links: Link[] = [];
+  /** `doc` (note or task id) points at `target` (note or task id) through a mention or a link. */
+  const references: { doc: string; target: string }[] = [];
   const inRange = (date: string) => date >= from && date <= to;
 
   const makeTask = (rng: Prng, key: string, title: string, projectId: string | undefined, createdOn: string, hour: number, slot: number): TaskPlan => {
@@ -163,6 +172,9 @@ export function generateDataset(options: GeneratorOptions = {}): { data: Databas
     const dow = dayOfWeek(d);
     const weekend = dow === 0 || dow === 6;
 
+    // Notes written in the last 30 days (always inside the warm-up, whatever the anchor)
+    const recentNotes = notes.filter(n => n.createdAt.slice(0, 10) >= addDays(d, -MENTION_WINDOW_DAYS));
+
     // Tasks created today: 0–2 on weekdays, rarely at weekends
     const newTasks = weekend ? (rng.chance(0.15) ? 1 : 0) : rng.weighted([[0, 5], [1, 4], [2, 1]]);
     for (let i = 0; i < newTasks; i++) {
@@ -172,7 +184,16 @@ export function generateDataset(options: GeneratorOptions = {}): { data: Databas
       const slot = (ord * 3 + i) % pool.length;
       const round = Math.floor((ord * 3 + i) / pool.length) % 7;
       const title = round === 0 ? pool[slot] : `${pool[slot]} (${round + 1})`;
-      plans.push(makeTask(rng, `${d}:${i}`, title, project?.id, d, rng.int(7, 11), i));
+      const plan = makeTask(rng, `${d}:${i}`, title, project?.id, d, rng.int(7, 11), i);
+      // Connected thinking: one task in five points at a recent note. Both draws always
+      // happen (even with nothing to pick) so the day's RNG stream never depends on history.
+      const wantsNote = rng.chance(0.35);
+      const note = rng.pick(recentNotes);
+      if (wantsNote && note) {
+        plan.task.description = `${plan.task.description ? plan.task.description + ' ' : ''}See [[note:${note.title}]].`;
+        references.push({ doc: plan.task.id, target: note.id });
+      }
+      plans.push(plan);
     }
 
     // Focus blocks, attached to tasks open today and created within the last 30 days
@@ -260,27 +281,88 @@ export function generateDataset(options: GeneratorOptions = {}): { data: Databas
       });
     }
 
-    // Notes: a new one now and then; one in twelve gets edited 25 days later
-    if (rng.chance(0.1)) {
+    // Notes: roughly one weekday in four; one in three gets edited some weeks later
+    if (rng.chance(weekend ? 0.08 : 0.25)) {
       const spec = NOTES[ord % NOTES.length];
+      // Titles cycle like task titles do, so most mentions resolve unambiguously.
+      const noteRound = Math.floor(ord / NOTES.length) % 26;
+      const title = noteRound === 0 ? spec.title : `${spec.title} (${noteRound + 1})`;
       const createdAt = iso(d, rng.int(9, 17), rng.int(0, 59));
-      const editedOn = addDays(d, 25);
-      const updatedAt = ord % 12 === 1 && editedOn <= to ? iso(editedOn, 10, 15) : createdAt;
-      notes.push({ id: id('note', d), title: spec.title, content: spec.content, tags: ['testdata', ...spec.tags], pinned: Boolean(spec.pinned), createdAt, updatedAt });
+      const editedOn = addDays(d, rng.int(5, 40));
+      const edited = rng.chance(0.34);
+      const updatedAt = edited && editedOn <= to ? iso(editedOn, 10, 15) : createdAt;
+      // Connected thinking: most notes mention a task open today, some an earlier note.
+      const noteId = id('note', d);
+      let content = spec.content;
+      const related: string[] = [];
+      // One to three distinct tasks (draws are fixed in number, whatever is available).
+      const taskMentions = rng.weighted([[0, 1], [1, 4], [2, 3], [3, 2]]);
+      const picked = new Set<string>();
+      for (let k = 0; k < 3; k++) {
+        const task = rng.pick(candidates);
+        if (k < taskMentions && task && !picked.has(task.id)) {
+          picked.add(task.id);
+          related.push(`[[task:${task.title}]]`);
+          references.push({ doc: noteId, target: task.id });
+        }
+      }
+      const wantsNote = rng.chance(0.5);
+      const earlier = rng.pick(recentNotes);
+      if (wantsNote && earlier && earlier.title !== title) {
+        related.push(`[[${earlier.title}]]`);
+        references.push({ doc: noteId, target: earlier.id });
+      }
+      if (related.length) content += `\n\nRelated: ${related.join(', ')}`;
+      notes.push({ id: noteId, title, content, tags: ['testdata', ...spec.tags], pinned: Boolean(spec.pinned), createdAt, updatedAt });
+    }
+
+    // Explicit "Link to…" links: now and then a note is linked to a task by hand
+    // Explicit "Link to…" links: a note linked to a task (or to another note) by hand on one weekday in five
+    const wantsLink = rng.chance(weekend ? 0.05 : 0.2);
+    const linkNote = rng.pick(recentNotes);
+    const linkTask = rng.pick(candidates);
+    const linkOther = rng.pick(recentNotes);
+    const toNote = rng.chance(0.3);
+    const linkHour = rng.int(9, 18);
+    const linkMinute = rng.int(0, 59);
+    if (wantsLink && linkNote) {
+      const target = toNote
+        ? (linkOther && linkOther.id !== linkNote.id ? { type: 'note' as const, id: linkOther.id, label: linkOther.title } : null)
+        : (linkTask ? { type: 'task' as const, id: linkTask.id, label: linkTask.title } : null);
+      if (target) {
+        links.push({
+          id: id('link', d),
+          from: { type: 'note', id: linkNote.id },
+          to: { type: target.type, id: target.id },
+          kind: 'link',
+          fromLabel: linkNote.title,
+          toLabel: target.label,
+          createdAt: iso(d, linkHour, linkMinute),
+        });
+        references.push({ doc: linkNote.id, target: target.id });
+      }
     }
 
     // Thoughts: 0–2 a day, mostly parked during a block
     const todaysBlocks = sessions.filter(s => s.type === 'focus' && s.timestamp.startsWith(d));
     const thoughtCount = rng.weighted([[0, 6], [1, 3], [2, 1]]);
     for (let i = 0; i < thoughtCount; i++) {
-      const text = THOUGHTS[(ord * 2 + i) % THOUGHTS.length];
+      let text = THOUGHTS[(ord * 2 + i) % THOUGHTS.length];
       const block = todaysBlocks.length && rng.chance(0.75) ? rng.pick(todaysBlocks) : undefined;
       const capturedAt = block
         ? new Date(Date.parse(block.timestamp) + rng.int(2, 20) * 60_000).toISOString()
         : iso(d, rng.int(8, 20), rng.int(0, 59));
       const status = rng.weighted<Thought['status']>([['inbox', 3], ['kept', 2], ['converted', 2], ['discarded', 2]]);
+      // One thought in four points at a recent note (never a converted one: its text becomes the task title).
+      const wantsMention = rng.chance(0.25);
+      const mentioned = rng.pick(recentNotes);
+      const thoughtId = id('thought', `${d}:${i}`);
+      if (wantsMention && mentioned && status !== 'converted') {
+        text = `${text} — see [[note:${mentioned.title}]]`;
+        references.push({ doc: thoughtId, target: mentioned.id });
+      }
       const thought: Thought = {
-        id: id('thought', `${d}:${i}`),
+        id: thoughtId,
         text,
         status,
         capturedAt,
@@ -303,15 +385,27 @@ export function generateDataset(options: GeneratorOptions = {}): { data: Databas
   // ── Keep the range; keep warm-up tasks only when the range refers to them or they got done in it ──
   const rangeSessions = sessions.filter(s => inRange(s.timestamp.slice(0, 10)));
   const rangeThoughts = thoughts.filter(t => inRange(t.capturedAt.slice(0, 10)));
+  const rangeLinks = links.filter(l => inRange(l.createdAt.slice(0, 10)));
   const referenced = new Set<string>();
   for (const s of rangeSessions) if (s.taskId) referenced.add(s.taskId);
   for (const t of rangeThoughts) {
     if (t.taskId) referenced.add(t.taskId);
     if (t.context?.taskId) referenced.add(t.context.taskId);
   }
-  const tasks = plans
-    .filter(p => inRange(p.createdOn) || referenced.has(p.task.id) || (p.doneOn !== undefined && inRange(p.doneOn)))
-    .map(p => p.task);
+  // Whatever is kept may mention (or be linked to) a warm-up note or task; keep those
+  // too, to a fixed point, so every generated mention and link resolves.
+  const kept = new Set<string>(referenced);
+  for (const p of plans) if (inRange(p.createdOn) || (p.doneOn !== undefined && inRange(p.doneOn))) kept.add(p.task.id);
+  for (const n of notes) if (inRange(n.createdAt.slice(0, 10))) kept.add(n.id);
+  for (const t of rangeThoughts) kept.add(t.id); // thoughts can mention notes too
+  for (const l of rangeLinks) { kept.add(l.from.id); kept.add(l.to.id); }
+  for (let changed = true; changed;) {
+    changed = false;
+    for (const r of references) {
+      if (kept.has(r.doc) && !kept.has(r.target)) { kept.add(r.target); changed = true; }
+    }
+  }
+  const tasks = plans.filter(p => kept.has(p.task.id)).map(p => p.task);
   const byId = new Map(tasks.map(t => [t.id, t]));
   for (const s of rangeSessions) {
     if (s.type === 'focus' && s.taskId) byId.get(s.taskId)!.actualMinutes += s.durationMinutes;
@@ -329,8 +423,9 @@ export function generateDataset(options: GeneratorOptions = {}): { data: Databas
   data.tasks.push(...tasks);
   data.focusSessions.push(...rangeSessions);
   data.dailyLogs.push(...logs.filter(l => inRange(l.date)));
-  data.notes.push(...notes.filter(n => inRange(n.createdAt.slice(0, 10))));
+  data.notes.push(...notes.filter(n => kept.has(n.id)));
   data.thoughts.push(...rangeThoughts.sort((a, b) => a.capturedAt.localeCompare(b.capturedAt)));
+  data.links.push(...rangeLinks);
   data.settings = { timeZone: tz };
 
   // ── Spot checks (found, not forced, so they stay date-centric) ──
@@ -342,6 +437,10 @@ export function generateDataset(options: GeneratorOptions = {}): { data: Databas
   const converted = data.thoughts.find(t => t.status === 'converted' && t.taskId);
   const incomplete = [...rangeSessions].reverse().find(s => s.type === 'focus' && !s.completed);
   const lateNight = rangeSessions.filter(s => s.type === 'focus' && s.timestamp.includes('T23:30:00'));
+  const mentionIndex = buildMentionIndex(data);
+  const mostConnected = data.notes
+    .map(n => ({ id: n.id, count: getBacklinks(data, { type: 'note', id: n.id }, mentionIndex).connections.length }))
+    .sort((a, b) => b.count - a.count || a.id.localeCompare(b.id))[0];
 
   const ids: Record<string, string[]> = {
     projects: data.projects.map(p => p.id),
@@ -350,6 +449,7 @@ export function generateDataset(options: GeneratorOptions = {}): { data: Databas
     dailyLogs: data.dailyLogs.map(l => l.id),
     notes: data.notes.map(n => n.id),
     thoughts: data.thoughts.map(t => t.id),
+    links: data.links.map(l => l.id),
   };
   const counts: Record<string, number> = {};
   for (const [k, v] of Object.entries(ids)) counts[k] = v.length;
@@ -377,6 +477,7 @@ export function generateDataset(options: GeneratorOptions = {}): { data: Databas
       lateNightSessionIds: lateNight.map(s => s.id),
       // Before the warm-up: nothing at all exists there.
       emptyMonth: addMonths(warmupFrom.slice(0, 7), -2),
+      mostConnectedNoteId: mostConnected && mostConnected.count > 0 ? mostConnected.id : null,
     },
   };
   return { data, manifest };

@@ -29,6 +29,8 @@ export interface Task {
   completedAt?: string;
   order: number;
   createdAt: string;
+  /** Last edit through the API (absent on records written before links existed). */
+  updatedAt?: string;
 }
 
 export type TimerType = 'focus' | 'short_break' | 'long_break';
@@ -140,6 +142,33 @@ export interface MonthlySummaryRecord {
   summary: unknown;     // MonthlySummary payload (typed in summary.ts)
 }
 
+// ── Links (connected thinking) ──
+//
+// Notes, tasks and thoughts can point at each other. Two sources exist:
+//   - `[[wiki]]` mentions typed into text, derived at read time (see links.ts) and
+//     never written to disk — the text *is* the link;
+//   - explicit links made with "Link to…", stored here.
+// Both ends carry a label snapshot so a link outlives the deletion of either end,
+// the same way a focus session keeps its `taskTitle`.
+
+export type LinkableType = 'note' | 'task' | 'thought';
+export const LINKABLE_TYPES: readonly LinkableType[] = ['note', 'task', 'thought'];
+
+export interface EntityRef {
+  type: LinkableType;
+  id: string;
+}
+
+export interface Link {
+  id: string;
+  from: EntityRef;
+  to: EntityRef;
+  kind: 'link';
+  fromLabel: string;
+  toLabel: string;
+  createdAt: string;
+}
+
 export interface Settings {
   /** Last IANA zone seen from a client; used by server-side jobs that have no client. */
   timeZone?: string;
@@ -153,6 +182,7 @@ export interface DatabaseSchema {
   notes: Note[];
   thoughts: Thought[];
   monthlySummaries: MonthlySummaryRecord[];
+  links: Link[];
   settings: Settings;
   /** The timer currently running or paused, if any. */
   activeTimer: ActiveTimer | null;
@@ -167,6 +197,7 @@ export function emptySchema(): DatabaseSchema {
     notes: [],
     thoughts: [],
     monthlySummaries: [],
+    links: [],
     settings: {},
     activeTimer: null,
   };
@@ -200,7 +231,7 @@ export interface DatabaseOptions {
 
 export const DEFAULT_DATA_FILE = () => path.join(process.cwd(), 'data', 'database.json');
 
-const ARRAY_COLLECTIONS = ['projects', 'tasks', 'focusSessions', 'dailyLogs', 'notes', 'thoughts', 'monthlySummaries'] as const;
+export const ARRAY_COLLECTIONS = ['projects', 'tasks', 'focusSessions', 'dailyLogs', 'notes', 'thoughts', 'monthlySummaries', 'links'] as const;
 
 /** Normalises a parsed file into a full schema; throws on shapes that are not a HeyWork store. */
 export function normaliseSchema(parsed: unknown, filePath = '<memory>'): DatabaseSchema {
@@ -235,6 +266,8 @@ export class Database {
   private filePath: string;
   private codec: StorageCodec;
   private initialized = false;
+  /** Bumped on every write to a linkable record; lets derived indexes (mentions) cache safely. */
+  private revisionCounter = 0;
 
   constructor(filePath?: string, options: DatabaseOptions = {}) {
     this.filePath = filePath || process.env.HEYW_DATA_FILE || DEFAULT_DATA_FILE();
@@ -250,6 +283,15 @@ export class Database {
     return this.initialized;
   }
 
+  /** Monotonic counter: changes whenever notes, tasks, thoughts or links change. */
+  get revision(): number {
+    return this.revisionCounter;
+  }
+
+  private touch(): void {
+    this.revisionCounter++;
+  }
+
   /**
    * Points the instance at a different file and drops in-memory state.
    * Used by `createServer({ dataFile })` and by tests; must be followed by `init()`.
@@ -259,6 +301,7 @@ export class Database {
     if (options.codec) this.codec = options.codec;
     this.data = emptySchema();
     this.initialized = false;
+    this.touch();
   }
 
   /**
@@ -297,6 +340,7 @@ export class Database {
       }
       this.data = normaliseSchema(parsed, this.filePath);
     }
+    this.touch();
     this.initialized = true;
   }
 
@@ -500,6 +544,7 @@ export class Database {
       completedAt: item.status === 'done' ? now : undefined,
     };
     this.data.tasks.push(task);
+    this.touch();
     return task;
   }
 
@@ -507,20 +552,23 @@ export class Database {
     const idx = this.data.tasks.findIndex(t => t.id === id);
     if (idx === -1) return null;
     const prevStatus = this.data.tasks[idx].status;
-    const task = { ...this.data.tasks[idx], ...updates };
+    const task = { ...this.data.tasks[idx], ...updates, updatedAt: new Date().toISOString() };
     if (updates.status === 'done' && prevStatus !== 'done') {
       task.completedAt = new Date().toISOString();
     } else if (updates.status && updates.status !== 'done') {
       delete task.completedAt;
     }
     this.data.tasks[idx] = task;
+    this.touch();
     return task;
   }
 
+  /** Explicit links to or from the task are kept (their `toLabel`/`fromLabel` keeps the title). */
   deleteTask(id: string): boolean {
     const idx = this.data.tasks.findIndex(t => t.id === id);
     if (idx === -1) return false;
     this.data.tasks.splice(idx, 1);
+    this.touch();
     return true;
   }
 
@@ -633,6 +681,7 @@ export class Database {
       updatedAt: now,
     };
     this.data.notes.push(note);
+    this.touch();
     return note;
   }
 
@@ -644,13 +693,16 @@ export class Database {
       ...updates,
       updatedAt: new Date().toISOString(),
     };
+    this.touch();
     return this.data.notes[idx];
   }
 
+  /** Explicit links to or from the note are kept (their label snapshot keeps the title). */
   deleteNote(id: string): boolean {
     const idx = this.data.notes.findIndex(n => n.id === id);
     if (idx === -1) return false;
     this.data.notes.splice(idx, 1);
+    this.touch();
     return true;
   }
 
@@ -683,6 +735,7 @@ export class Database {
       context: input.context,
     };
     this.data.thoughts.push(thought);
+    this.touch();
     return thought;
   }
 
@@ -699,6 +752,7 @@ export class Database {
         thought.reviewedAt = new Date().toISOString();
       }
     }
+    this.touch();
     return thought;
   }
 
@@ -722,6 +776,7 @@ export class Database {
     thought.status = 'converted';
     thought.taskId = task.id;
     thought.reviewedAt = new Date().toISOString();
+    this.touch();
     return { thought, task };
   }
 
@@ -730,6 +785,79 @@ export class Database {
     const idx = this.data.thoughts.findIndex(t => t.id === id);
     if (idx === -1) return false;
     this.data.thoughts.splice(idx, 1);
+    this.touch();
+    return true;
+  }
+
+  // ── Links (explicit, user-made) ──
+  //
+  // `[[mentions]]` typed into text are *not* stored here; they are derived from
+  // the text by links.ts. This collection only holds links made deliberately.
+
+  /** Looks up the record a ref points at, if it still exists. */
+  getEntity(ref: EntityRef): Note | Task | Thought | undefined {
+    switch (ref.type) {
+      case 'note': return this.getNote(ref.id);
+      case 'task': return this.getTask(ref.id);
+      case 'thought': return this.getThought(ref.id);
+      default: return undefined;
+    }
+  }
+
+  /** Human label of a ref: note/task title, thought text. Undefined when the record is gone. */
+  labelOf(ref: EntityRef): string | undefined {
+    const entity = this.getEntity(ref);
+    if (!entity) return undefined;
+    return ref.type === 'thought' ? (entity as Thought).text : (entity as Note | Task).title;
+  }
+
+  getLinks(): Link[] {
+    return [...this.data.links];
+  }
+
+  getLink(id: string): Link | undefined {
+    return this.data.links.find(l => l.id === id);
+  }
+
+  /** Links where `ref` is either end. */
+  getLinksTouching(ref: EntityRef): Link[] {
+    return this.data.links.filter(l => refEquals(l.from, ref) || refEquals(l.to, ref));
+  }
+
+  findLink(from: EntityRef, to: EntityRef): Link | undefined {
+    return this.data.links.find(l => refEquals(l.from, from) && refEquals(l.to, to));
+  }
+
+  /**
+   * Creates an explicit link. Idempotent: the same pair returns the existing link
+   * (`created: false`). Both ends must exist at creation time; the label snapshot
+   * is what keeps the link readable after either end is deleted.
+   */
+  createLink(from: EntityRef, to: EntityRef): { link: Link; created: boolean } | null {
+    const fromLabel = this.labelOf(from);
+    const toLabel = this.labelOf(to);
+    if (fromLabel === undefined || toLabel === undefined) return null;
+    const existing = this.findLink(from, to) || this.findLink(to, from);
+    if (existing) return { link: existing, created: false };
+    const link: Link = {
+      id: crypto.randomUUID(),
+      from: { type: from.type, id: from.id },
+      to: { type: to.type, id: to.id },
+      kind: 'link',
+      fromLabel,
+      toLabel,
+      createdAt: new Date().toISOString(),
+    };
+    this.data.links.push(link);
+    this.touch();
+    return { link, created: true };
+  }
+
+  deleteLink(id: string): boolean {
+    const idx = this.data.links.findIndex(l => l.id === id);
+    if (idx === -1) return false;
+    this.data.links.splice(idx, 1);
+    this.touch();
     return true;
   }
 
@@ -826,6 +954,14 @@ export class Database {
       todayLog: this.getDailyLog(today) || null,
     };
   }
+}
+
+export function refEquals(a: EntityRef, b: EntityRef): boolean {
+  return a.type === b.type && a.id === b.id;
+}
+
+export function refKey(ref: EntityRef): string {
+  return `${ref.type}:${ref.id}`;
 }
 
 export const db = new Database();

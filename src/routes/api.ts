@@ -7,6 +7,9 @@ import { TIMER_TYPES, normalisePlanned } from '../db/timer.js';
 import { isValidMonthString } from '../db/time.js';
 import { archiveIndex, currentMonth, freezeMonth, getSummaryPage, isClosedMonth } from '../db/bookofwork.js';
 import { renderMonthlyMarkdown } from '../db/summary-markdown.js';
+import { applyRename, buildCatalog, isLinkableType, mentionIndexFor, parseRef, resolveText, searchLinkables } from '../db/links.js';
+import { buildLocalGraph, getBacklinks, suggestFocus, DEFAULT_MAX_NODES } from '../db/graph.js';
+import type { LinkableType } from '../db/database.js';
 import type { ServerResponse } from 'node:http';
 
 function json(res: ServerResponse, data: any, status = 200) {
@@ -138,10 +141,13 @@ router.put('/api/tasks/:id', async (_req, res, match, body) => {
   const invalid = validateTaskFields(updates);
   if (invalid) return json(res, { error: invalid }, 400);
   if (typeof updates.title === 'string') updates.title = updates.title.trim();
-  const updated = db.updateTask(match[1], updates);
-  if (!updated) return json(res, { error: 'Task not found' }, 404);
+  if (updates.projectId === null) updates.projectId = undefined; // "no project" (dropped from the JSON on disk)
+  if (!db.getTask(match[1])) return json(res, { error: 'Task not found' }, 404);
+  const rewritten = typeof updates.title === 'string' ? applyRename(db, { type: 'task', id: match[1] }, updates.title) : 0;
+  const updated = db.updateTask(match[1], updates)!;
   await db.persist();
-  json(res, updated);
+  res.setHeader('X-HeyWork-Rewritten-Mentions', String(rewritten));
+  json(res, { ...updated, rewrittenMentions: rewritten });
 });
 
 router.delete('/api/tasks/:id', async (_req, res, match) => {
@@ -246,10 +252,13 @@ router.put('/api/notes/:id', async (_req, res, match, body) => {
   if ('content' in updates && typeof updates.content !== 'string') return json(res, { error: 'content must be a string' }, 400);
   if ('tags' in updates && !Array.isArray(updates.tags)) return json(res, { error: 'tags must be an array' }, 400);
   if ('pinned' in updates) updates.pinned = Boolean(updates.pinned);
-  const updated = db.updateNote(match[1], updates);
-  if (!updated) return json(res, { error: 'Note not found' }, 404);
+  if (!db.getNote(match[1])) return json(res, { error: 'Note not found' }, 404);
+  // Renaming rewrites `[[mentions]]` of the old title elsewhere (before the title changes).
+  const rewritten = typeof updates.title === 'string' ? applyRename(db, { type: 'note', id: match[1] }, updates.title) : 0;
+  const updated = db.updateNote(match[1], updates)!;
   await db.persist();
-  json(res, updated);
+  res.setHeader('X-HeyWork-Rewritten-Mentions', String(rewritten));
+  json(res, { ...updated, rewrittenMentions: rewritten });
 });
 
 router.delete('/api/notes/:id', async (_req, res, match) => {
@@ -317,10 +326,13 @@ router.put('/api/thoughts/:id', async (_req, res, match, body) => {
   if ('status' in updates && !THOUGHT_STATUSES.includes(updates.status as ThoughtStatus)) {
     return json(res, { error: `status must be one of ${THOUGHT_STATUSES.join(', ')}` }, 400);
   }
-  const updated = db.updateThought(match[1], updates as { text?: string; status?: ThoughtStatus });
-  if (!updated) return json(res, { error: 'Thought not found' }, 404);
+  if (!db.getThought(match[1])) return json(res, { error: 'Thought not found' }, 404);
+  // A thought is referenced by its text, so editing the text is a rename.
+  const rewritten = typeof updates.text === 'string' ? applyRename(db, { type: 'thought', id: match[1] }, updates.text) : 0;
+  const updated = db.updateThought(match[1], updates as { text?: string; status?: ThoughtStatus })!;
   await db.persist();
-  json(res, updated);
+  res.setHeader('X-HeyWork-Rewritten-Mentions', String(rewritten));
+  json(res, { ...updated, rewrittenMentions: rewritten });
 });
 
 router.post('/api/thoughts/:id/convert', async (_req, res, match, body) => {
@@ -426,6 +438,87 @@ function summariseFinalize(result: ReturnType<typeof timerEngine.stop>) {
     taskTitle: result.timer.taskTitle || null,
   };
 }
+
+// ── Links: connected thinking ──
+//
+// `[[mentions]]` are derived from text on the fly (links.ts); only deliberate
+// "Link to…" links are stored. All three edge sources are merged by graph.ts.
+
+const MAX_PREVIEW_LENGTH = 200_000;
+
+function parseTypes(raw: string | null | undefined): LinkableType[] | null {
+  if (!raw) return ['note', 'task', 'thought'];
+  const types = raw.split(',').map(t => t.trim()).filter(Boolean);
+  if (!types.length || !types.every(isLinkableType)) return null;
+  return types as LinkableType[];
+}
+
+// Everything touching one item (both directions, every kind, any month).
+router.get('/api/links', async (_req, res, _match, _body, query) => {
+  const ref = parseRef({ type: query?.get('type'), id: query?.get('id') });
+  if (!ref) return json(res, { error: 'type (note|task|thought) and id are required' }, 400);
+  json(res, getBacklinks(db.snapshot(), ref, mentionIndexFor(db)));
+});
+
+router.post('/api/links', async (_req, res, _match, body) => {
+  const from = parseRef(body?.from);
+  const to = parseRef(body?.to);
+  if (!from || !to) return json(res, { error: 'from and to must be {type: note|task|thought, id}' }, 400);
+  if (from.type === to.type && from.id === to.id) return json(res, { error: 'An item cannot link to itself' }, 400);
+  if (!db.getEntity(from)) return json(res, { error: `${from.type} not found` }, 404);
+  if (!db.getEntity(to)) return json(res, { error: `${to.type} not found` }, 404);
+  const result = db.createLink(from, to)!;
+  if (result.created) await db.persist();
+  json(res, result.link, result.created ? 201 : 200);
+});
+
+router.delete('/api/links/:id', async (_req, res, match) => {
+  const ok = db.deleteLink(match[1]);
+  if (!ok) return json(res, { error: 'Link not found' }, 404);
+  await db.persist();
+  json(res, { success: true });
+});
+
+// Resolves the mentions in unsaved text so the editor can show them live.
+router.post('/api/links/preview', async (_req, res, _match, body) => {
+  const text = typeof body?.text === 'string' ? body.text : null;
+  if (text === null) return json(res, { error: 'text must be a string' }, 400);
+  if (text.length > MAX_PREVIEW_LENGTH) return json(res, { error: 'text too long to preview' }, 413);
+  json(res, { mentions: resolveText(text, buildCatalog(db.snapshot())) });
+});
+
+// Autocomplete and the "Link to…" picker.
+router.get('/api/search', async (_req, res, _match, _body, query) => {
+  const q = query?.get('q') || '';
+  const types = parseTypes(query?.get('types'));
+  if (!types) return json(res, { error: 'types must be a comma-separated subset of note,task,thought' }, 400);
+  const rawLimit = query?.has('limit') ? parseInt(query.get('limit')!, 10) : 8;
+  const limit = Number.isFinite(rawLimit) ? Math.min(Math.max(rawLimit, 1), 50) : 8;
+  json(res, searchLinkables(db.snapshot(), q, types, limit));
+});
+
+// Local graph around one item, limited to the month (default: the current one in the caller's zone).
+// Without `focus`, the server picks the most connected item active in the month.
+// `quiet=1` also shows direct neighbours with no activity in the month.
+router.get('/api/graph', async (_req, res, _match, _body, query) => {
+  const tz = await resolveTz(res, query);
+  const month = query?.get('month') || currentMonth(tz);
+  if (!isValidMonthString(month)) return json(res, { error: 'month must be YYYY-MM' }, 400);
+  let focus = parseRef(query?.get('focus'));
+  let suggested: 'active' | 'fallback' | null = null;
+  if (!focus) {
+    if (query?.has('focus')) return json(res, { error: 'focus must be type:id with type note|task|thought' }, 400);
+    const suggestion = suggestFocus(db.snapshot(), month, tz);
+    if (!suggestion) return json(res, { graph: null, suggested: 'fallback', month, timeZone: tz });
+    focus = suggestion.ref;
+    suggested = suggestion.reason;
+  }
+  const rawMax = query?.has('maxNodes') ? parseInt(query.get('maxNodes')!, 10) : DEFAULT_MAX_NODES;
+  const maxNodes = Number.isFinite(rawMax) ? Math.min(Math.max(rawMax, 5), 200) : DEFAULT_MAX_NODES;
+  const includeQuiet = query?.get('quiet') === '1' || query?.get('quiet') === 'true';
+  const graph = buildLocalGraph(db.snapshot(), { focus, month, tz, maxNodes, includeQuiet });
+  json(res, suggested ? { ...graph, suggested } : graph);
+});
 
 // ── Backups ──
 

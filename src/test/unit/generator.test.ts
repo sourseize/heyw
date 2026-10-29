@@ -13,6 +13,7 @@ import { buildReport, datasetHash, renderReportMarkdown } from '../../tools/test
 import { computeMonthlySummary } from '../../db/summary.js';
 import { renderMonthlyMarkdown } from '../../db/summary-markdown.js';
 import { normaliseSchema } from '../../db/database.js';
+import { buildMentionIndex } from '../../db/links.js';
 
 const fixtures = path.join(process.cwd(), 'src', 'test', 'fixtures');
 
@@ -34,7 +35,7 @@ test('generator - same inputs give byte-identical output; the hash is pinned by 
 
 test('generator - every record is namespaced, tagged where possible, and loads as a valid store', () => {
   const { data, manifest } = gen();
-  for (const key of ['projects', 'tasks', 'focusSessions', 'dailyLogs', 'notes', 'thoughts'] as const) {
+  for (const key of ['projects', 'tasks', 'focusSessions', 'dailyLogs', 'notes', 'thoughts', 'links'] as const) {
     assert.ok((data[key] as any[]).length > 0, `${key} populated`);
     for (const r of data[key] as { id: string }[]) assert.ok(isTestDataId(r.id), `${key} id ${r.id} is namespaced`);
     assert.equal(manifest.counts[key], (data[key] as any[]).length);
@@ -188,8 +189,43 @@ test('generator - monthly summaries and markdown match the committed goldens', (
     const actual = computeMonthlySummary(data, month, 'UTC', { now });
     assert.deepEqual(actual, expected, `summary for ${month} drifted — if intentional run: npm run test:update-golden`);
   }
-  const md = fs.readFileSync(path.join(fixtures, 'monthly-summary.golden.md'), 'utf-8');
+  // The golden may be checked out with CRLF on some machines; the renderer always emits LF.
+  const md = fs.readFileSync(path.join(fixtures, 'monthly-summary.golden.md'), 'utf-8').replace(/\r\n/g, '\n');
   assert.equal(renderMonthlyMarkdown(computeMonthlySummary(data, '2025-03', 'UTC', { now }), { frozen: true }), md);
+});
+
+test('generator - connected thinking: every mention and link resolves, ends exist, the report agrees', () => {
+  const { data, manifest } = gen();
+  const index = buildMentionIndex(data);
+  assert.ok(index.edges.length > 0, 'notes and task descriptions mention each other');
+  assert.equal(index.unresolved.size, 0, 'a generated [[mention]] never points into the void');
+  const noteIds = new Set(data.notes.map(n => n.id));
+  const taskIds = new Set(data.tasks.map(t => t.id));
+  for (const l of data.links) {
+    assert.ok(isTestDataId(l.id));
+    assert.equal(l.kind, 'link');
+    assert.ok(noteIds.has(l.from.id), 'explicit links start at a kept note');
+    assert.ok(l.to.type === 'task' ? taskIds.has(l.to.id) : noteIds.has(l.to.id), 'and end at a kept task or note');
+    assert.equal(l.fromLabel, data.notes.find(n => n.id === l.from.id)!.title);
+    assert.equal(l.toLabel, (l.to.type === 'task' ? data.tasks.find(t => t.id === l.to.id)! : data.notes.find(n => n.id === l.to.id)!).title);
+    assert.ok(l.createdAt >= manifest.from && l.createdAt.slice(0, 10) <= manifest.to, 'links are dated inside the range');
+  }
+  assert.ok(manifest.spotChecks.mostConnectedNoteId && noteIds.has(manifest.spotChecks.mostConnectedNoteId));
+  assert.ok(data.links.some(l => l.to.type === 'note'), 'some links go note → note');
+  assert.ok(data.thoughts.some(t => t.status !== 'converted' && t.text.includes('[[note:')), 'some thoughts mention a note');
+  assert.ok(data.thoughts.every(t => t.status !== 'converted' || !t.text.includes('[[')), 'converted thoughts keep a clean text (it became the task title)');
+  assert.ok(data.notes.length >= 25, `enough notes to make graphs interesting (${data.notes.length})`);
+  assert.ok(index.edges.length >= 60, `enough mentions (${index.edges.length})`);
+  const r = buildReport(data, manifest, 'UTC');
+  assert.equal(r.connections.explicitLinks, data.links.length);
+  assert.equal(r.connections.mentionEdges, index.edges.length);
+  assert.equal(r.connections.unresolvedMentions, 0);
+  assert.ok(r.connections.mostConnected && r.connections.mostConnected.count > 0);
+  assert.match(renderReportMarkdown(r), /## Connected thinking/);
+
+  // The small profile has no history and still resolves cleanly; a different month range keeps the same invariant.
+  const small = gen({ profile: 'small' });
+  assert.equal(buildMentionIndex(small.data).unresolved.size, 0);
 });
 
 test('generator - the validation report is consistent with the summaries and is deterministic', () => {

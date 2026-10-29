@@ -150,7 +150,7 @@ test('R09 - merge mode: round-trip leaves the user store byte-identical, protect
     assert.match(clean.out, /Verified: your own records are byte-identical to before seeding/);
 
     const after = JSON.parse(await fs.readFile(file, 'utf-8'));
-    for (const key of ['projects', 'tasks', 'focusSessions', 'dailyLogs', 'notes', 'thoughts']) {
+    for (const key of ['projects', 'tasks', 'focusSessions', 'dailyLogs', 'notes', 'thoughts', 'links']) {
       assert.deepEqual(after[key], before[key], `${key} restored exactly`);
     }
     assert.deepEqual(after.monthlySummaries, [], 'polluted snapshots are gone (re-frozen cleanly at next start)');
@@ -182,11 +182,16 @@ test('R09 - merge mode unlinks user records that pointed at test data', async ()
     const { data: mine } = await again.api('POST', '/api/tasks', { title: 'Mine, in a test project', projectId: testProject.id });
     const testTask = (await again.api('GET', '/api/tasks')).data.find((x: any) => x.id.startsWith('7e57da7a-'));
     await again.api('POST', '/api/focus', { durationMinutes: 25, taskId: testTask.id, taskTitle: testTask.title });
+    // …and links a note of their own to a generated task, and mentions a generated note by title
+    const testNote = (await again.api('GET', '/api/notes')).data.find((x: any) => x.id.startsWith('7e57da7a-'));
+    const { data: myNote } = await again.api('POST', '/api/notes', { title: 'My note', content: `See [[note:${testNote.title}]]` });
+    const { data: myLink } = await again.api('POST', '/api/links', { from: { type: 'note', id: myNote.id }, to: { type: 'task', id: testTask.id } });
+    assert.ok(myLink.id && !myLink.id.startsWith('7e57da7a-'));
     await again.stop();
 
     const clean = run(['clean', '--into', file]);
     assert.equal(clean.code, 3, 'exit 3 signals the user changed records while seeded (expected here)');
-    assert.match(clean.out, /Unlinked 2 reference\(s\)/);
+    assert.match(clean.out, /Unlinked 3 reference\(s\)/);
     const after = JSON.parse(await fs.readFile(file, 'utf-8'));
     const mineAfter = after.tasks.find((x: any) => x.id === mine.id);
     assert.ok(mineAfter, 'the user task survives');
@@ -195,6 +200,8 @@ test('R09 - merge mode unlinks user records that pointed at test data', async ()
     assert.ok(block);
     assert.equal(block.taskId, undefined);
     assert.ok(after.tasks.every((x: any) => !x.id.startsWith('7e57da7a-')));
+    assert.deepEqual(after.links, [], 'the user link to a removed task is gone; generated links are gone');
+    assert.equal(after.notes.find((n: any) => n.id === myNote.id).content, `See [[note:${testNote.title}]]`, 'typed text is never edited — the mention just no longer resolves');
   } finally {
     await t.cleanup();
   }

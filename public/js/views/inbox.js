@@ -5,6 +5,8 @@
 // only takes it out of sight — nothing is deleted, and anything can come back.
 const InboxView = {
   tab: 'inbox',
+  /** Resolved `[[mentions]]` per thought id, for the cards on screen. */
+  mentions: new Map(),
 
   TABS: [
     { id: 'inbox', label: 'Inbox', empty: 'Nothing parked. Press P during a focus block to capture a thought without breaking flow.' },
@@ -13,11 +15,26 @@ const InboxView = {
     { id: 'discarded', label: 'Discarded', empty: 'Nothing discarded.' },
   ],
 
-  async render(container) {
+  async render(container, params = {}) {
+    // Deep link `#inbox/<thoughtId>`: open the tab the thought lives in and highlight it.
+    const requested = params.path && params.path[0];
+    let highlight = null;
+    if (requested) {
+      const all = await API.getThoughts();
+      const found = all.find(t => t.id === requested);
+      if (found) {
+        this.tab = found.status;
+        highlight = found.id;
+      } else {
+        showToast('That thought no longer exists', 'error');
+      }
+    }
+
     const [thoughts, counts] = await Promise.all([
       API.getThoughts(this.tab),
       this.loadCounts(),
     ]);
+    this.mentions = await Links.previewMany(thoughts.map(t => ({ id: t.id, text: t.text })));
 
     container.innerHTML = `
       <div style="max-width:820px;margin:0 auto">
@@ -46,6 +63,14 @@ const InboxView = {
     `;
 
     this.bindEvents(container);
+
+    if (highlight) {
+      const card = container.querySelector(`.thought-card[data-id="${highlight}"]`);
+      if (card) {
+        card.classList.add('thought-card-highlight');
+        card.scrollIntoView({ block: 'center' });
+      }
+    }
   },
 
   async loadCounts() {
@@ -57,24 +82,29 @@ const InboxView = {
   },
 
   card(thought) {
+    const ref = { type: 'thought', id: thought.id };
+    const connect = `
+        <button class="btn btn-secondary btn-sm" data-act="link" data-id="${thought.id}" data-testid="thought-link" title="Link this thought to a note or task">⛓ Link to…</button>
+        <a class="btn btn-secondary btn-sm" href="${Links.graphHrefFor(ref)}" data-testid="thought-graph" title="See what this thought connects to">◎</a>`;
     const actions = {
       inbox: `
         <button class="btn btn-primary btn-sm" data-act="convert" data-id="${thought.id}" data-testid="thought-convert">→ Task</button>
         <button class="btn btn-secondary btn-sm" data-act="kept" data-id="${thought.id}" data-testid="thought-keep">Keep for later</button>
-        <button class="btn btn-secondary btn-sm" data-act="discarded" data-id="${thought.id}" data-testid="thought-discard">Discard</button>`,
+        <button class="btn btn-secondary btn-sm" data-act="discarded" data-id="${thought.id}" data-testid="thought-discard">Discard</button>${connect}`,
       kept: `
         <button class="btn btn-primary btn-sm" data-act="convert" data-id="${thought.id}" data-testid="thought-convert">→ Task</button>
         <button class="btn btn-secondary btn-sm" data-act="inbox" data-id="${thought.id}">Back to inbox</button>
-        <button class="btn btn-secondary btn-sm" data-act="discarded" data-id="${thought.id}" data-testid="thought-discard">Discard</button>`,
+        <button class="btn btn-secondary btn-sm" data-act="discarded" data-id="${thought.id}" data-testid="thought-discard">Discard</button>${connect}`,
       converted: `
-        <span class="thought-linked" data-testid="thought-linked">✓ on the board</span>`,
+        <span class="thought-linked" data-testid="thought-linked">✓ on the board</span>
+        ${thought.taskId ? `<a class="btn btn-secondary btn-sm" href="${Links.hrefFor({ type: 'task', id: thought.taskId })}" data-testid="thought-open-task">↗ Open task</a>` : ''}${connect}`,
       discarded: `
         <button class="btn btn-secondary btn-sm" data-act="inbox" data-id="${thought.id}" data-testid="thought-restore">Restore</button>`,
     };
 
     return `
       <div class="thought-card" data-id="${thought.id}" data-testid="thought-card">
-        <div class="thought-text">${escapeHtml(thought.text)}</div>
+        <div class="thought-text">${Links.renderInline(thought.text, this.mentions.get(thought.id))}</div>
         <div class="thought-meta">${this.contextLine(thought)}</div>
         <div class="thought-actions">${actions[thought.status] || ''}</div>
       </div>
@@ -89,7 +119,11 @@ const InboxView = {
     const labels = { focus: 'Deep Focus', short_break: 'a Short Break', long_break: 'Rest' };
     let line = `captured ${time}`;
     if (ctx.timerRunning && ctx.timerType) line += ` during ${labels[ctx.timerType] || 'a block'}`;
-    if (ctx.taskTitle) line += ` on “${escapeHtml(ctx.taskTitle)}”`;
+    if (ctx.taskTitle) {
+      line += ctx.taskId
+        ? ` on ${Links.chip({ type: 'task', id: ctx.taskId }, ctx.taskTitle, { max: 40 })}`
+        : ` on “${escapeHtml(ctx.taskTitle)}”`;
+    }
     return line;
   },
 
@@ -112,6 +146,10 @@ const InboxView = {
         try {
           if (act === 'convert') {
             await this.convert(container, id);
+            return;
+          }
+          if (act === 'link') {
+            LinkPicker.open({ from: { type: 'thought', id }, onLinked: () => this.render(container) });
             return;
           }
           await API.updateThought(id, { status: act });

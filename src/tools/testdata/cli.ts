@@ -14,8 +14,10 @@
  * Fresh mode (default) never opens your real store. Merge mode backs the target
  * up first, refuses to seed twice, skips journal days you already have, and on
  * clean removes exactly the namespaced records, unlinks anything pointing at
- * them, drops Book-of-Work snapshots generated while test data was present, and
- * verifies your own records are byte-identical to before.
+ * them (including your own explicit links to test notes/tasks), drops Book-of-Work
+ * snapshots generated while test data was present, and verifies your own records
+ * are byte-identical to before. `[[mentions]]` you typed yourself are text and are
+ * never touched; they simply stop resolving once the test record is gone.
  */
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -41,7 +43,7 @@ interface Args {
   json: boolean;
 }
 
-const ARRAY_COLLECTIONS = ['projects', 'tasks', 'focusSessions', 'dailyLogs', 'notes', 'thoughts'] as const;
+const ARRAY_COLLECTIONS = ['projects', 'tasks', 'focusSessions', 'dailyLogs', 'notes', 'thoughts', 'links'] as const;
 
 function parseArgs(argv: string[]): Args {
   const args: Args = {
@@ -200,6 +202,7 @@ export async function seed(args: Args, log = console.log): Promise<StoredManifes
   store.dailyLogs.push(...logsToAdd);
   store.notes.push(...data.notes);
   store.thoughts.push(...data.thoughts);
+  store.links.push(...data.links);
   // settings/activeTimer/monthlySummaries are the user's; leave them alone.
 
   await writeStore(target, store);
@@ -247,6 +250,12 @@ export function stripTestData(store: DatabaseSchema, manifest: StoredManifest | 
   for (const th of out.thoughts) {
     if (isTestDataId(th.taskId)) { delete th.taskId; unlinked++; }
     if (th.context && isTestDataId(th.context.taskId)) { delete th.context.taskId; delete th.context.taskTitle; unlinked++; }
+  }
+  // Explicit links the user made to (or from) a test record cannot survive without it.
+  const danglingLinks = out.links.filter(l => isTestDataId(l.from.id) || isTestDataId(l.to.id)).length;
+  if (danglingLinks) {
+    out.links = out.links.filter(l => !(isTestDataId(l.from.id) || isTestDataId(l.to.id)));
+    unlinked += danglingLinks;
   }
   if (out.activeTimer && isTestDataId(out.activeTimer.taskId)) {
     out.activeTimer = { ...out.activeTimer };

@@ -1,6 +1,8 @@
 // ── HeyWork: Core Application Controller ──
 const App = {
   currentView: 'today',
+  /** The view object currently on screen; `destroy()` is called on it before the next one renders. */
+  activeView: null,
 
   init() {
     this.initTheme();
@@ -11,9 +13,26 @@ const App = {
     this.navigate(window.location.hash.slice(1) || 'today');
 
     window.addEventListener('hashchange', () => {
-      const page = window.location.hash.slice(1) || 'today';
-      this.navigate(page);
+      this.navigate(window.location.hash.slice(1) || 'today');
     });
+  },
+
+  /**
+   * Entity deep-links: `#notes/<id>`, `#board/<taskId>`, `#inbox/<thoughtId>`,
+   * `#connections/<type>/<id>`. The first segment is the view, the rest is handed
+   * to it as `params.path`.
+   */
+  parseHash(hash) {
+    const parts = (hash || '').split('/').map(p => decodeURIComponent(p)).filter(Boolean);
+    return { page: parts[0] || 'today', path: parts.slice(1) };
+  },
+
+  /** Builds the hash for a linkable item so every view agrees on where things live. */
+  hashFor(ref) {
+    if (!ref) return 'today';
+    const views = { note: 'notes', task: 'board', thought: 'inbox' };
+    const view = views[ref.type];
+    return view ? `${view}/${encodeURIComponent(ref.id)}` : 'today';
   },
 
   /**
@@ -149,13 +168,21 @@ const App = {
         window.location.hash = 'inbox';
       } else if (e.key === '7') {
         window.location.hash = 'bookofwork';
+      } else if (e.key === '8') {
+        window.location.hash = 'connections';
       } else if (e.key === 't' || e.key === 'T') {
         document.getElementById('theme-toggle')?.click();
       }
     });
   },
 
-  navigate(page) {
+  navigate(hash) {
+    const { page, path } = this.parseHash(hash);
+    const params = { path };
+    // Let the outgoing view release timers, listeners or animation loops.
+    if (this.activeView && typeof this.activeView.destroy === 'function') {
+      try { this.activeView.destroy(); } catch (err) { console.error(err); }
+    }
     this.currentView = page;
     this.renderMiniTimer(FocusTimer.state);
     const container = document.getElementById('page-content');
@@ -178,6 +205,7 @@ const App = {
       notes: 'Notes & Scratchpad',
       insights: 'Insights & Analytics',
       bookofwork: 'Book of Work',
+      connections: 'Connections',
     };
 
     if (titleEl) {
@@ -187,32 +215,19 @@ const App = {
     if (!container) return;
     container.innerHTML = '<div style="color:var(--text-muted);padding:2rem">Loading...</div>';
 
-    switch (page) {
-      case 'today':
-        TodayView.render(container);
-        break;
-      case 'board':
-        BoardView.render(container);
-        break;
-      case 'journal':
-        JournalView.render(container);
-        break;
-      case 'inbox':
-        InboxView.render(container);
-        break;
-      case 'notes':
-        NotesView.render(container);
-        break;
-      case 'insights':
-        InsightsView.render(container);
-        break;
-      case 'bookofwork':
-        BookOfWorkView.render(container);
-        break;
-      default:
-        TodayView.render(container);
-        break;
-    }
+    const views = {
+      today: TodayView,
+      board: BoardView,
+      journal: JournalView,
+      inbox: InboxView,
+      notes: NotesView,
+      insights: InsightsView,
+      bookofwork: BookOfWorkView,
+      connections: typeof ConnectionsView !== 'undefined' ? ConnectionsView : TodayView,
+    };
+    const view = views[page] || TodayView;
+    this.activeView = view;
+    view.render(container, params);
   }
 };
 

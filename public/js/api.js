@@ -130,4 +130,33 @@ const API = {
   deleteNote(id) {
     return this.request('DELETE', `/api/notes/${id}`);
   },
+
+  // Links (connected thinking)
+  /** Everything touching one item: mentions, explicit links, became / captured-during. */
+  getConnections(ref) {
+    return this.request('GET', `/api/links?type=${encodeURIComponent(ref.type)}&id=${encodeURIComponent(ref.id)}`);
+  },
+  createLink(from, to) {
+    return this.request('POST', '/api/links', { from, to });
+  },
+  deleteLink(id) {
+    return this.request('DELETE', `/api/links/${id}`);
+  },
+  /** Resolves the `[[mentions]]` in unsaved text. */
+  previewLinks(text) {
+    return this.request('POST', '/api/links/preview', { text });
+  },
+  searchLinkables(q, types, limit = 8) {
+    const params = new URLSearchParams({ q: q || '', limit: String(limit) });
+    if (types && types.length) params.set('types', types.join(','));
+    return this.request('GET', `/api/search?${params.toString()}`);
+  },
+  /** `ref` may be null: the server then picks the most connected item active in the month. */
+  getGraph(ref, month, options = {}) {
+    const params = new URLSearchParams({ tz: this.timeZone });
+    if (ref) params.set('focus', `${ref.type}:${ref.id}`);
+    if (month) params.set('month', month);
+    if (options.quiet) params.set('quiet', '1');
+    return this.request('GET', `/api/graph?${params.toString()}`);
+  },
 };

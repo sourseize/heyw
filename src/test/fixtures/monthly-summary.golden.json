@@ -13,16 +13,16 @@
       "daysElapsed": 31,
       "generatedAt": "2025-03-31T12:00:00.000Z",
       "deepWork": {
-        "totalMinutes": 1830,
-        "totalHours": 30.5,
-        "sessions": 47,
-        "completedSessions": 37,
-        "avgSessionMinutes": 39,
+        "totalMinutes": 1937,
+        "totalHours": 32.3,
+        "sessions": 45,
+        "completedSessions": 38,
+        "avgSessionMinutes": 43,
         "activeDays": 19,
-        "longestStreakDays": 5,
+        "longestStreakDays": 6,
         "bestDay": {
           "date": "2024-12-06",
-          "minutes": 189
+          "minutes": 230
         },
         "byWeek": [
           {
@@ -34,86 +34,82 @@
           {
             "weekStart": "2024-12-02",
             "weekEnd": "2024-12-08",
-            "minutes": 400,
-            "sessions": 10
+            "minutes": 495,
+            "sessions": 9
           },
           {
             "weekStart": "2024-12-09",
             "weekEnd": "2024-12-15",
-            "minutes": 524,
-            "sessions": 13
+            "minutes": 391,
+            "sessions": 11
           },
           {
             "weekStart": "2024-12-16",
             "weekEnd": "2024-12-22",
-            "minutes": 419,
+            "minutes": 539,
             "sessions": 10
           },
           {
             "weekStart": "2024-12-23",
             "weekEnd": "2024-12-29",
-            "minutes": 377,
-            "sessions": 11
+            "minutes": 427,
+            "sessions": 13
           },
           {
             "weekStart": "2024-12-30",
             "weekEnd": "2024-12-31",
-            "minutes": 110,
-            "sessions": 3
+            "minutes": 85,
+            "sessions": 2
           }
         ],
         "byProject": [
           {
             "projectId": "7e57da7a-3870-4be4-896b-ad5fbc3f80d7",
             "projectName": "Writing",
-            "minutes": 629,
-            "sessions": 17
+            "minutes": 678,
+            "sessions": 16
           },
           {
             "projectId": "7e57da7a-8494-463c-8b7f-8632b79dbdcf",
             "projectName": "HeyWork",
-            "minutes": 458,
+            "minutes": 380,
             "sessions": 9
           },
           {
             "projectId": "7e57da7a-4147-4815-873b-544e6a71cf53",
             "projectName": "Learning",
-            "minutes": 383,
-            "sessions": 10
+            "minutes": 355,
+            "sessions": 9
           },
           {
             "projectId": null,
             "projectName": "No project",
-            "minutes": 235,
-            "sessions": 7
+            "minutes": 294,
+            "sessions": 8
           },
           {
             "projectId": "7e57da7a-671c-4f09-8400-87d1be89fbcf",
             "projectName": "Home",
-            "minutes": 125,
-            "sessions": 4
+            "minutes": 230,
+            "sessions": 3
           }
         ],
         "byDay": [
           {
             "date": "2024-12-03",
-            "minutes": 86
-          },
-          {
-            "date": "2024-12-04",
-            "minutes": 50
-          },
-          {
-            "date": "2024-12-05",
             "minutes": 75
           },
           {
-            "date": "2024-12-06",
-            "minutes": 189
+            "date": "2024-12-04",
+            "minutes": 25
           },
           {
-            "date": "2024-12-09",
-            "minutes": 108
+            "date": "2024-12-05",
+            "minutes": 165
+          },
+          {
+            "date": "2024-12-06",
+            "minutes": 230
           },
           {
             "date": "2024-12-10",
@@ -125,23 +121,31 @@
           },
           {
             "date": "2024-12-12",
-            "minutes": 75
+            "minutes": 25
           },
           {
             "date": "2024-12-13",
             "minutes": 58
           },
           {
+            "date": "2024-12-15",
+            "minutes": 25
+          },
+          {
+            "date": "2024-12-16",
+            "minutes": 100
+          },
+          {
             "date": "2024-12-17",
-            "minutes": 144
+            "minutes": 222
           },
           {
             "date": "2024-12-18",
-            "minutes": 75
+            "minutes": 115
           },
           {
             "date": "2024-12-19",
-            "minutes": 125
+            "minutes": 27
           },
           {
             "date": "2024-12-20",
@@ -153,7 +157,7 @@
           },
           {
             "date": "2024-12-25",
-            "minutes": 50
+            "minutes": 100
           },
           {
             "date": "2024-12-26",
@@ -164,38 +168,34 @@
             "minutes": 165
           },
           {
-            "date": "2024-12-30",
-            "minutes": 25
-          },
-          {
             "date": "2024-12-31",
             "minutes": 85
           }
         ],
-        "breakMinutes": 280
+        "breakMinutes": 245
       },
       "flow": {
-        "sessionsWithSignals": 34,
+        "sessionsWithSignals": 30,
         "uninterruptedSessions": 5,
-        "awayMinutes": 27.5,
-        "distractions": 30,
-        "appInteractions": 63,
-        "unverifiedMinutes": 15,
+        "awayMinutes": 31.5,
+        "distractions": 33,
+        "appInteractions": 37,
+        "unverifiedMinutes": 11,
         "endings": {
-          "completed": 37,
+          "completed": 38,
           "stopped": 6,
-          "switched": 4,
+          "switched": 1,
           "abandoned": 0,
           "unknown": 0
         }
       },
       "accomplishments": {
-        "tasksCompleted": 17,
+        "tasksCompleted": 19,
         "byPriority": {
-          "low": 7,
-          "medium": 6,
-          "high": 1,
-          "urgent": 3
+          "low": 6,
+          "medium": 4,
+          "high": 3,
+          "urgent": 6
         },
         "byProject": [
           {
@@ -203,39 +203,52 @@
             "projectName": "HeyWork",
             "tasks": [
               {
-                "id": "7e57da7a-87ed-4f62-882b-ade54b1cbf6c",
-                "title": "Could the export be streamed instead of buffered?",
-                "priority": "medium",
-                "completedAt": "2024-12-04T13:47:00.000Z",
+                "id": "7e57da7a-362e-499c-8088-9d5d1dfbba55",
+                "title": "Draft the talk abstract",
+                "priority": "urgent",
+                "completedAt": "2024-12-02T14:06:00.000Z",
+                "completedOn": "2024-12-02",
+                "estimatedMinutes": 90,
+                "actualMinutes": 0,
+                "tags": [
+                  "testdata",
+                  "from-thought"
+                ]
+              },
+              {
+                "id": "7e57da7a-4c37-4154-8a4c-854a638442cb",
+                "title": "Investigate pop-out on Firefox (2)",
+                "priority": "high",
+                "completedAt": "2024-12-04T13:01:00.000Z",
                 "completedOn": "2024-12-04",
-                "estimatedMinutes": 15,
+                "estimatedMinutes": 120,
                 "actualMinutes": 25,
                 "tags": [
                   "testdata",
-                  "from-thought"
+                  "creative",
+                  "bug"
                 ]
               },
               {
-                "id": "7e57da7a-7837-49bb-8127-77c3e7501624",
-                "title": "Rename \"Rest\" to \"Long break\"? Maybe not",
-                "priority": "high",
-                "completedAt": "2024-12-07T16:11:00.000Z",
-                "completedOn": "2024-12-07",
-                "estimatedMinutes": 50,
+                "id": "7e57da7a-d850-4f07-8445-2b1a7f58caca",
+                "title": "Ship the thought inbox (5)",
+                "priority": "medium",
+                "completedAt": "2024-12-15T15:31:00.000Z",
+                "completedOn": "2024-12-15",
+                "estimatedMinutes": 90,
                 "actualMinutes": 0,
                 "tags": [
-                  "testdata",
-                  "from-thought"
+                  "testdata"
                 ]
               },
               {
-                "id": "7e57da7a-e6ea-4d0d-8c7f-c006175f74c2",
-                "title": "Call mum on Sunday",
-                "priority": "medium",
-                "completedAt": "2024-12-08T13:44:00.000Z",
-                "completedOn": "2024-12-08",
+                "id": "7e57da7a-c552-440a-855f-f140fce55c22",
+                "title": "Add a keyboard hint to the capture bar",
+                "priority": "urgent",
+                "completedAt": "2024-12-15T18:00:00.000Z",
+                "completedOn": "2024-12-15",
                 "estimatedMinutes": 15,
-                "actualMinutes": 0,
+                "actualMinutes": 25,
                 "tags": [
                   "testdata",
                   "from-thought"
@@ -270,12 +283,12 @@
                 ]
               },
               {
-                "id": "7e57da7a-9d79-4f23-8063-225960f50130",
-                "title": "Call mum on Sunday",
+                "id": "7e57da7a-5818-4591-83f8-736986659b64",
+                "title": "Rename \"Rest\" to \"Long break\"? Maybe not",
                 "priority": "low",
-                "completedAt": "2024-12-31T16:59:00.000Z",
-                "completedOn": "2024-12-31",
-                "estimatedMinutes": 25,
+                "completedAt": "2024-12-26T14:15:00.000Z",
+                "completedOn": "2024-12-26",
+                "estimatedMinutes": 90,
                 "actualMinutes": 0,
                 "tags": [
                   "testdata",
@@ -285,23 +298,80 @@
             ]
           },
           {
-            "projectId": "7e57da7a-671c-4f09-8400-87d1be89fbcf",
-            "projectName": "Home",
+            "projectId": "7e57da7a-3870-4be4-896b-ad5fbc3f80d7",
+            "projectName": "Writing",
             "tasks": [
               {
                 "id": "7e57da7a-d7e3-420f-8d5f-f3f7abc18c00",
-                "title": "Renew passport (7)",
-                "priority": "medium",
-                "completedAt": "2024-12-12T13:40:00.000Z",
-                "completedOn": "2024-12-12",
-                "estimatedMinutes": 90,
+                "title": "Answer the interview questions (4)",
+                "priority": "high",
+                "completedAt": "2024-12-14T17:45:00.000Z",
+                "completedOn": "2024-12-14",
+                "estimatedMinutes": 25,
+                "actualMinutes": 33,
+                "tags": [
+                  "testdata",
+                  "admin"
+                ]
+              },
+              {
+                "id": "7e57da7a-5730-4ef1-8ca6-888957b7682b",
+                "title": "Outline the deep-work essay (3)",
+                "priority": "urgent",
+                "completedAt": "2024-12-18T18:49:00.000Z",
+                "completedOn": "2024-12-18",
+                "estimatedMinutes": 25,
+                "actualMinutes": 115,
+                "tags": [
+                  "testdata",
+                  "deep",
+                  "creative"
+                ]
+              },
+              {
+                "id": "7e57da7a-1bb1-4eae-84cc-af8093c8034f",
+                "title": "Collect reader replies (6)",
+                "priority": "low",
+                "completedAt": "2024-12-21T15:49:00.000Z",
+                "completedOn": "2024-12-21",
+                "estimatedMinutes": 15,
+                "actualMinutes": 75,
+                "tags": [
+                  "testdata",
+                  "creative"
+                ]
+              },
+              {
+                "id": "7e57da7a-c9ba-46f2-8f7d-87208a790418",
+                "title": "Outline the deep-work essay",
+                "priority": "urgent",
+                "completedAt": "2024-12-21T17:07:00.000Z",
+                "completedOn": "2024-12-21",
+                "estimatedMinutes": 120,
                 "actualMinutes": 0,
                 "tags": [
                   "testdata",
-                  "admin",
-                  "review"
+                  "idea"
                 ]
               },
+              {
+                "id": "7e57da7a-01ad-47d0-86f5-3f03d90f0a7d",
+                "title": "Schedule the April issue (7)",
+                "priority": "urgent",
+                "completedAt": "2024-12-31T13:03:00.000Z",
+                "completedOn": "2024-12-31",
+                "estimatedMinutes": 15,
+                "actualMinutes": 140,
+                "tags": [
+                  "testdata"
+                ]
+              }
+            ]
+          },
+          {
+            "projectId": "7e57da7a-671c-4f09-8400-87d1be89fbcf",
+            "projectName": "Home",
+            "tasks": [
               {
                 "id": "7e57da7a-4bd8-4ff4-80a3-0344488b5146",
                 "title": "Replace bike brake pads (3)",
@@ -323,22 +393,10 @@
                 "completedAt": "2024-12-20T15:59:00.000Z",
                 "completedOn": "2024-12-20",
                 "estimatedMinutes": 25,
-                "actualMinutes": 25,
+                "actualMinutes": 90,
                 "tags": [
                   "testdata",
                   "deep"
-                ]
-              },
-              {
-                "id": "7e57da7a-d850-4f07-8445-2b1a7f58caca",
-                "title": "Order new desk lamp",
-                "priority": "low",
-                "completedAt": "2024-12-20T16:45:00.000Z",
-                "completedOn": "2024-12-20",
-                "estimatedMinutes": 15,
-                "actualMinutes": 0,
-                "tags": [
-                  "testdata"
                 ]
               },
               {
@@ -348,65 +406,7 @@
                 "completedAt": "2024-12-30T13:11:00.000Z",
                 "completedOn": "2024-12-30",
                 "estimatedMinutes": 15,
-                "actualMinutes": 0,
-                "tags": [
-                  "testdata"
-                ]
-              }
-            ]
-          },
-          {
-            "projectId": "7e57da7a-3870-4be4-896b-ad5fbc3f80d7",
-            "projectName": "Writing",
-            "tasks": [
-              {
-                "id": "7e57da7a-5730-4ef1-8ca6-888957b7682b",
-                "title": "Outline the deep-work essay (3)",
-                "priority": "urgent",
-                "completedAt": "2024-12-18T18:49:00.000Z",
-                "completedOn": "2024-12-18",
-                "estimatedMinutes": 25,
-                "actualMinutes": 86,
-                "tags": [
-                  "testdata",
-                  "deep",
-                  "creative"
-                ]
-              },
-              {
-                "id": "7e57da7a-1bb1-4eae-84cc-af8093c8034f",
-                "title": "Collect reader replies (6)",
-                "priority": "low",
-                "completedAt": "2024-12-21T15:49:00.000Z",
-                "completedOn": "2024-12-21",
-                "estimatedMinutes": 15,
-                "actualMinutes": 0,
-                "tags": [
-                  "testdata",
-                  "creative"
-                ]
-              },
-              {
-                "id": "7e57da7a-c9ba-46f2-8f7d-87208a790418",
-                "title": "Outline the deep-work essay",
-                "priority": "urgent",
-                "completedAt": "2024-12-21T17:07:00.000Z",
-                "completedOn": "2024-12-21",
-                "estimatedMinutes": 120,
-                "actualMinutes": 25,
-                "tags": [
-                  "testdata",
-                  "idea"
-                ]
-              },
-              {
-                "id": "7e57da7a-01ad-47d0-86f5-3f03d90f0a7d",
-                "title": "Schedule the April issue (7)",
-                "priority": "urgent",
-                "completedAt": "2024-12-31T13:03:00.000Z",
-                "completedOn": "2024-12-31",
-                "estimatedMinutes": 15,
-                "actualMinutes": 50,
+                "actualMinutes": 90,
                 "tags": [
                   "testdata"
                 ]
@@ -417,6 +417,20 @@
             "projectId": "7e57da7a-4147-4815-873b-544e6a71cf53",
             "projectName": "Learning",
             "tasks": [
+              {
+                "id": "7e57da7a-2558-439e-8a42-a9567c61a3cf",
+                "title": "Finish TypeScript generics module (3)",
+                "priority": "urgent",
+                "completedAt": "2024-12-04T18:41:00.000Z",
+                "completedOn": "2024-12-04",
+                "estimatedMinutes": 50,
+                "actualMinutes": 0,
+                "tags": [
+                  "testdata",
+                  "admin",
+                  "review"
+                ]
+              },
               {
                 "id": "7e57da7a-cc30-4f2c-83ca-955b7333af45",
                 "title": "Review flashcards (5)",
@@ -445,20 +459,40 @@
                 ]
               }
             ]
+          },
+          {
+            "projectId": null,
+            "projectName": "No project",
+            "tasks": [
+              {
+                "id": "7e57da7a-65c3-496f-8218-e01c25398ecb",
+                "title": "Reply to Sam (7)",
+                "priority": "high",
+                "completedAt": "2024-12-22T16:15:00.000Z",
+                "completedOn": "2024-12-22",
+                "estimatedMinutes": 50,
+                "actualMinutes": 0,
+                "tags": [
+                  "testdata",
+                  "quick",
+                  "deep"
+                ]
+              }
+            ]
           }
         ],
         "estimationAccuracy": {
-          "estimated": 725,
-          "actual": 211,
-          "ratio": 0.3
+          "estimated": 1045,
+          "actual": 593,
+          "ratio": 0.6
         },
-        "tasksCreated": 21,
+        "tasksCreated": 22,
         "tasksStillOpen": 14
       },
       "reflections": {
-        "journalDays": 16,
+        "journalDays": 17,
         "avgEnergy": 3.4,
-        "avgFocus": 3.7,
+        "avgFocus": 3.4,
         "ratingsByWeek": [
           {
             "weekStart": "2024-12-01",
@@ -470,37 +504,37 @@
           {
             "weekStart": "2024-12-02",
             "weekEnd": "2024-12-08",
-            "energy": 3.6,
-            "focus": 3.8,
+            "energy": 3,
+            "focus": 3.4,
             "days": 5
           },
           {
             "weekStart": "2024-12-09",
             "weekEnd": "2024-12-15",
-            "energy": 2.8,
-            "focus": 4,
-            "days": 4
+            "energy": 5,
+            "focus": 4.5,
+            "days": 2
           },
           {
             "weekStart": "2024-12-16",
             "weekEnd": "2024-12-22",
-            "energy": 2.7,
-            "focus": 3.7,
-            "days": 3
+            "energy": 2.3,
+            "focus": 3.8,
+            "days": 4
           },
           {
             "weekStart": "2024-12-23",
             "weekEnd": "2024-12-29",
-            "energy": 4.3,
-            "focus": 3,
-            "days": 3
+            "energy": 4,
+            "focus": 2.5,
+            "days": 4
           },
           {
             "weekStart": "2024-12-30",
             "weekEnd": "2024-12-31",
-            "energy": null,
-            "focus": null,
-            "days": 0
+            "energy": 3,
+            "focus": 2,
+            "days": 1
           }
         ],
         "entries": [
@@ -517,30 +551,31 @@
           {
             "date": "2024-12-02",
             "intentions": [
-              "Leave the desk by six",
-              "Finish what I started yesterday"
+              "Move the hardest task first",
+              "Protect the morning for deep work"
             ],
-            "retro": "Steady. Nothing dramatic, which is the point.",
-            "energyRating": 2,
-            "focusRating": 5
+            "retro": "Felt scattered until I wrote the intentions down. Then it clicked.",
+            "energyRating": 4,
+            "focusRating": 4
+          },
+          {
+            "date": "2024-12-03",
+            "intentions": [
+              "Close the loop on open threads",
+              "Write before reading",
+              "Protect the morning for deep work"
+            ],
+            "retro": "Lost the thread after lunch. Should have taken the long break.",
+            "energyRating": 3,
+            "focusRating": 3
           },
           {
             "date": "2024-12-04",
             "intentions": [
-              "Move the hardest task first"
-            ],
-            "retro": "Steady. Nothing dramatic, which is the point.",
-            "energyRating": 5,
-            "focusRating": 4
-          },
-          {
-            "date": "2024-12-05",
-            "intentions": [
-              "Two focus blocks before lunch",
               "Leave the desk by six"
             ],
-            "retro": "Got pulled into a rabbit hole on tooling. Worth it? Unclear.",
-            "energyRating": 5,
+            "retro": "Calm day. Parked five thoughts instead of chasing them — that helped.",
+            "energyRating": 2,
             "focusRating": 4
           },
           {
@@ -562,35 +597,14 @@
             "focusRating": 1
           },
           {
-            "date": "2024-12-09",
-            "intentions": [
-              "Ship one meaningful thing",
-              "Protect the morning for deep work"
-            ],
-            "retro": "",
-            "energyRating": 3,
-            "focusRating": 4
-          },
-          {
             "date": "2024-12-11",
             "intentions": [
-              "Plan the week on paper",
-              "Move the hardest task first",
-              "Review the board before starting"
+              "Keep the inbox at zero",
+              "One hour on the essay"
             ],
-            "retro": "Too many meetings; salvaged one focus block at the end of the day.",
-            "energyRating": 2,
+            "retro": "Low energy. Did admin instead of forcing deep work. Fine.",
+            "energyRating": 5,
             "focusRating": 5
-          },
-          {
-            "date": "2024-12-12",
-            "intentions": [
-              "Say no to one thing",
-              "Clear blockers for tomorrow"
-            ],
-            "retro": "Calm day. Parked five thoughts instead of chasing them — that helped.",
-            "energyRating": 1,
-            "focusRating": 3
           },
           {
             "date": "2024-12-14",
@@ -604,13 +618,22 @@
           {
             "date": "2024-12-16",
             "intentions": [
-              "Walk at lunch",
-              "Review the board before starting",
-              "Say no to one thing"
+              "Clear blockers for tomorrow",
+              "Review the board before starting"
             ],
-            "retro": "Interrupted constantly. Moving the desk away from the door.",
+            "retro": "Spent longer than estimated on the bug, but it is genuinely fixed now.",
             "energyRating": 4,
-            "focusRating": 4
+            "focusRating": 5
+          },
+          {
+            "date": "2024-12-17",
+            "intentions": [
+              "Protect the morning for deep work",
+              "Plan the week on paper"
+            ],
+            "retro": "",
+            "energyRating": 1,
+            "focusRating": 3
           },
           {
             "date": "2024-12-21",
@@ -631,6 +654,17 @@
             "focusRating": 4
           },
           {
+            "date": "2024-12-23",
+            "intentions": [
+              "One hour on the essay",
+              "Plan the week on paper",
+              "Protect the morning for deep work"
+            ],
+            "retro": "Finished the chapter draft. Rough, but it exists.",
+            "energyRating": 4,
+            "focusRating": 5
+          },
+          {
             "date": "2024-12-24",
             "intentions": [
               "Write before reading"
@@ -642,13 +676,11 @@
           {
             "date": "2024-12-25",
             "intentions": [
-              "Walk at lunch",
-              "Two focus blocks before lunch",
-              "Review the board before starting"
+              "One hour on the essay"
             ],
-            "retro": "Finished the chapter draft. Rough, but it exists.",
-            "energyRating": 4,
-            "focusRating": 5
+            "retro": "Slow start, strong finish. The 50-minute block worked better than two 25s.",
+            "energyRating": 3,
+            "focusRating": 1
           },
           {
             "date": "2024-12-26",
@@ -659,20 +691,29 @@
             "retro": "Felt scattered until I wrote the intentions down. Then it clicked.",
             "energyRating": 5,
             "focusRating": 3
+          },
+          {
+            "date": "2024-12-30",
+            "intentions": [
+              "Protect the morning for deep work"
+            ],
+            "retro": "Finished the chapter draft. Rough, but it exists.",
+            "energyRating": 3,
+            "focusRating": 2
           }
         ]
       },
       "thoughts": {
-        "captured": 14,
-        "converted": 2,
+        "captured": 16,
+        "converted": 3,
         "kept": 4,
         "discarded": 3,
-        "pendingInbox": 5,
-        "capturedDuringFocus": 7
+        "pendingInbox": 6,
+        "capturedDuringFocus": 9
       },
       "notes": {
-        "created": 4,
-        "updated": 0
+        "created": 8,
+        "updated": 2
       }
     },
     "2025-01": {
@@ -684,85 +725,85 @@
       "daysElapsed": 31,
       "generatedAt": "2025-03-31T12:00:00.000Z",
       "deepWork": {
-        "totalMinutes": 1927,
-        "totalHours": 32.1,
-        "sessions": 46,
-        "completedSessions": 34,
-        "avgSessionMinutes": 42,
-        "activeDays": 23,
-        "longestStreakDays": 5,
+        "totalMinutes": 1949,
+        "totalHours": 32.5,
+        "sessions": 48,
+        "completedSessions": 35,
+        "avgSessionMinutes": 41,
+        "activeDays": 22,
+        "longestStreakDays": 6,
         "bestDay": {
-          "date": "2025-01-29",
-          "minutes": 157
+          "date": "2025-01-07",
+          "minutes": 190
         },
         "byWeek": [
           {
             "weekStart": "2025-01-01",
             "weekEnd": "2025-01-05",
-            "minutes": 272,
+            "minutes": 197,
             "sessions": 7
           },
           {
             "weekStart": "2025-01-06",
             "weekEnd": "2025-01-12",
-            "minutes": 374,
-            "sessions": 8
+            "minutes": 544,
+            "sessions": 14
           },
           {
             "weekStart": "2025-01-13",
             "weekEnd": "2025-01-19",
-            "minutes": 360,
-            "sessions": 9
+            "minutes": 454,
+            "sessions": 8
           },
           {
             "weekStart": "2025-01-20",
             "weekEnd": "2025-01-26",
-            "minutes": 460,
-            "sessions": 12
+            "minutes": 400,
+            "sessions": 10
           },
           {
             "weekStart": "2025-01-27",
             "weekEnd": "2025-01-31",
-            "minutes": 461,
-            "sessions": 10
+            "minutes": 354,
+            "sessions": 9
           }
         ],
         "byProject": [
           {
             "projectId": "7e57da7a-8494-463c-8b7f-8632b79dbdcf",
             "projectName": "HeyWork",
-            "minutes": 932,
-            "sessions": 20
-          },
-          {
-            "projectId": null,
-            "projectName": "No project",
-            "minutes": 388,
-            "sessions": 9
+            "minutes": 1027,
+            "sessions": 22
           },
           {
             "projectId": "7e57da7a-3870-4be4-896b-ad5fbc3f80d7",
             "projectName": "Writing",
-            "minutes": 236,
+            "minutes": 325,
+            "sessions": 9
+          },
+          {
+            "projectId": "7e57da7a-4147-4815-873b-544e6a71cf53",
+            "projectName": "Learning",
+            "minutes": 244,
+            "sessions": 6
+          },
+          {
+            "projectId": null,
+            "projectName": "No project",
+            "minutes": 215,
             "sessions": 7
           },
           {
             "projectId": "7e57da7a-671c-4f09-8400-87d1be89fbcf",
             "projectName": "Home",
-            "minutes": 187,
-            "sessions": 7
-          },
-          {
-            "projectId": "7e57da7a-4147-4815-873b-544e6a71cf53",
-            "projectName": "Learning",
-            "minutes": 184,
-            "sessions": 3
+            "minutes": 138,
+            "sessions": 4
           }
         ],
         "byDay": [
           {
             "date": "2025-01-01",
-            "minutes": 140
+            "minutes": 65
           },
           {
             "date": "2025-01-02",
@@ -777,12 +818,16 @@
             "minutes": 8
           },
           {
+            "date": "2025-01-06",
+            "minutes": 42
+          },
+          {
             "date": "2025-01-07",
-            "minutes": 140
+            "minutes": 190
           },
           {
             "date": "2025-01-08",
-            "minutes": 75
+            "minutes": 177
           },
           {
             "date": "2025-01-09",
@@ -790,35 +835,27 @@
           },
           {
             "date": "2025-01-10",
-            "minutes": 115
+            "minutes": 91
           },
           {
             "date": "2025-01-13",
             "minutes": 115
           },
           {
-            "date": "2025-01-14",
-            "minutes": 35
-          },
-          {
             "date": "2025-01-15",
-            "minutes": 25
+            "minutes": 84
           },
           {
             "date": "2025-01-16",
-            "minutes": 135
+            "minutes": 115
           },
           {
-            "date": "2025-01-18",
-            "minutes": 50
+            "date": "2025-01-17",
+            "minutes": 140
           },
           {
             "date": "2025-01-20",
             "minutes": 90
-          },
-          {
-            "date": "2025-01-21",
-            "minutes": 100
           },
           {
             "date": "2025-01-22",
@@ -830,7 +867,7 @@
           },
           {
             "date": "2025-01-24",
-            "minutes": 75
+            "minutes": 115
           },
           {
             "date": "2025-01-26",
@@ -842,7 +879,7 @@
           },
           {
             "date": "2025-01-29",
-            "minutes": 157
+            "minutes": 50
           },
           {
             "date": "2025-01-30",
@@ -853,30 +890,30 @@
             "minutes": 79
           }
         ],
-        "breakMinutes": 330
+        "breakMinutes": 260
       },
       "flow": {
-        "sessionsWithSignals": 28,
-        "uninterruptedSessions": 2,
-        "awayMinutes": 25.9,
-        "distractions": 29,
-        "appInteractions": 61,
-        "unverifiedMinutes": 4,
+        "sessionsWithSignals": 22,
+        "uninterruptedSessions": 4,
+        "awayMinutes": 14.3,
+        "distractions": 16,
+        "appInteractions": 50,
+        "unverifiedMinutes": 7,
         "endings": {
-          "completed": 34,
-          "stopped": 7,
-          "switched": 5,
+          "completed": 35,
+          "stopped": 9,
+          "switched": 4,
           "abandoned": 0,
           "unknown": 0
         }
       },
       "accomplishments": {
-        "tasksCompleted": 12,
+        "tasksCompleted": 13,
         "byPriority": {
-          "low": 4,
-          "medium": 2,
-          "high": 3,
-          "urgent": 3
+          "low": 3,
+          "medium": 3,
+          "high": 5,
+          "urgent": 2
         },
         "byProject": [
           {
@@ -890,7 +927,7 @@
                 "completedAt": "2025-01-07T13:23:00.000Z",
                 "completedOn": "2025-01-07",
                 "estimatedMinutes": 25,
-                "actualMinutes": 0,
+                "actualMinutes": 50,
                 "tags": [
                   "testdata",
                   "quick"
@@ -903,7 +940,7 @@
                 "completedAt": "2025-01-13T14:15:00.000Z",
                 "completedOn": "2025-01-13",
                 "estimatedMinutes": 50,
-                "actualMinutes": 0,
+                "actualMinutes": 50,
                 "tags": [
                   "testdata",
                   "deep",
@@ -917,7 +954,7 @@
                 "completedAt": "2025-01-21T14:57:00.000Z",
                 "completedOn": "2025-01-21",
                 "estimatedMinutes": 50,
-                "actualMinutes": 134,
+                "actualMinutes": 94,
                 "tags": [
                   "testdata",
                   "review",
@@ -931,10 +968,23 @@
                 "completedAt": "2025-01-28T14:56:00.000Z",
                 "completedOn": "2025-01-28",
                 "estimatedMinutes": 120,
-                "actualMinutes": 0,
+                "actualMinutes": 25,
                 "tags": [
                   "testdata",
                   "deep"
+                ]
+              },
+              {
+                "id": "7e57da7a-93ce-4b56-80f0-9881d9083598",
+                "title": "Solve three katas (7)",
+                "priority": "medium",
+                "completedAt": "2025-01-30T14:36:00.000Z",
+                "completedOn": "2025-01-30",
+                "estimatedMinutes": 25,
+                "actualMinutes": 50,
+                "tags": [
+                  "testdata",
+                  "bug"
                 ]
               }
             ]
@@ -944,13 +994,26 @@
             "projectName": "HeyWork",
             "tasks": [
               {
-                "id": "7e57da7a-57a9-4fe9-80ab-57ec1d77f556",
-                "title": "Find a better word than \"tinkering\"",
-                "priority": "low",
-                "completedAt": "2025-01-17T14:42:00.000Z",
-                "completedOn": "2025-01-17",
-                "estimatedMinutes": 120,
-                "actualMinutes": 90,
+                "id": "7e57da7a-3ba0-48c8-8293-804a7e448bf7",
+                "title": "Pause notifications during focus — OS level?",
+                "priority": "high",
+                "completedAt": "2025-01-08T14:51:00.000Z",
+                "completedOn": "2025-01-08",
+                "estimatedMinutes": 50,
+                "actualMinutes": 111,
+                "tags": [
+                  "testdata",
+                  "from-thought"
+                ]
+              },
+              {
+                "id": "7e57da7a-5a08-43d4-8cd1-18bd0510a8c3",
+                "title": "Add a keyboard hint to the capture bar",
+                "priority": "medium",
+                "completedAt": "2025-01-25T14:00:00.000Z",
+                "completedOn": "2025-01-25",
+                "estimatedMinutes": 15,
+                "actualMinutes": 75,
                 "tags": [
                   "testdata",
                   "from-thought"
@@ -963,19 +1026,19 @@
                 "completedAt": "2025-01-25T16:02:00.000Z",
                 "completedOn": "2025-01-25",
                 "estimatedMinutes": 120,
-                "actualMinutes": 50,
+                "actualMinutes": 0,
                 "tags": [
                   "testdata"
                 ]
               },
               {
-                "id": "7e57da7a-adc2-4514-8ed4-f3141091f7e4",
-                "title": "Batch email to twice a day",
-                "priority": "urgent",
-                "completedAt": "2025-01-25T16:36:00.000Z",
-                "completedOn": "2025-01-25",
-                "estimatedMinutes": 15,
-                "actualMinutes": 0,
+                "id": "7e57da7a-9ff2-4925-87a7-8e49fdb0c8fb",
+                "title": "Draft the talk abstract",
+                "priority": "high",
+                "completedAt": "2025-01-26T17:28:00.000Z",
+                "completedOn": "2025-01-26",
+                "estimatedMinutes": 25,
+                "actualMinutes": 90,
                 "tags": [
                   "testdata",
                   "from-thought"
@@ -1014,19 +1077,6 @@
                   "bug",
                   "creative"
                 ]
-              },
-              {
-                "id": "7e57da7a-06a3-4c6b-8f07-4725222314b6",
-                "title": "Sort tax receipts (2)",
-                "priority": "medium",
-                "completedAt": "2025-01-16T14:38:00.000Z",
-                "completedOn": "2025-01-16",
-                "estimatedMinutes": 50,
-                "actualMinutes": 25,
-                "tags": [
-                  "testdata",
-                  "deep"
-                ]
               }
             ]
           },
@@ -1041,7 +1091,7 @@
                 "completedAt": "2025-01-21T13:00:00.000Z",
                 "completedOn": "2025-01-21",
                 "estimatedMinutes": 15,
-                "actualMinutes": 50,
+                "actualMinutes": 0,
                 "tags": [
                   "testdata"
                 ]
@@ -1053,7 +1103,7 @@
                 "completedAt": "2025-01-29T17:57:00.000Z",
                 "completedOn": "2025-01-29",
                 "estimatedMinutes": 90,
-                "actualMinutes": 75,
+                "actualMinutes": 0,
                 "tags": [
                   "testdata"
                 ]
@@ -1062,64 +1112,55 @@
           }
         ],
         "estimationAccuracy": {
-          "estimated": 685,
-          "actual": 424,
-          "ratio": 0.6
+          "estimated": 615,
+          "actual": 545,
+          "ratio": 0.9
         },
-        "tasksCreated": 19,
-        "tasksStillOpen": 20
+        "tasksCreated": 20,
+        "tasksStillOpen": 21
       },
       "reflections": {
-        "journalDays": 23,
-        "avgEnergy": 3.6,
-        "avgFocus": 3.1,
+        "journalDays": 20,
+        "avgEnergy": 3.8,
+        "avgFocus": 3.3,
         "ratingsByWeek": [
           {
             "weekStart": "2025-01-01",
             "weekEnd": "2025-01-05",
-            "energy": 3.8,
-            "focus": 3.2,
-            "days": 5
+            "energy": 4.3,
+            "focus": 3.3,
+            "days": 3
           },
           {
             "weekStart": "2025-01-06",
             "weekEnd": "2025-01-12",
-            "energy": 3.4,
-            "focus": 4.2,
-            "days": 5
+            "energy": 3,
+            "focus": 4.5,
+            "days": 4
           },
           {
             "weekStart": "2025-01-13",
             "weekEnd": "2025-01-19",
-            "energy": 3.2,
-            "focus": 2.4,
-            "days": 5
+            "energy": 4,
+            "focus": 3.3,
+            "days": 3
           },
           {
             "weekStart": "2025-01-20",
             "weekEnd": "2025-01-26",
-            "energy": 3.8,
-            "focus": 3.3,
-            "days": 4
+            "energy": 4,
+            "focus": 2.8,
+            "days": 5
           },
           {
             "weekStart": "2025-01-27",
             "weekEnd": "2025-01-31",
-            "energy": 4,
-            "focus": 2.5,
-            "days": 4
+            "energy": 3.8,
+            "focus": 2.8,
+            "days": 5
           }
         ],
         "entries": [
-          {
-            "date": "2025-01-01",
-            "intentions": [
-              "Walk at lunch"
-            ],
-            "retro": "Finished the chapter draft. Rough, but it exists.",
-            "energyRating": 3,
-            "focusRating": 3
-          },
           {
             "date": "2025-01-02",
             "intentions": [
@@ -1140,17 +1181,6 @@
             "focusRating": 4
           },
           {
-            "date": "2025-01-04",
-            "intentions": [
-              "Walk at lunch",
-              "Leave the desk by six",
-              "Clear blockers for tomorrow"
-            ],
-            "retro": "Calm day. Parked five thoughts instead of chasing them — that helped.",
-            "energyRating": 3,
-            "focusRating": 3
-          },
-          {
             "date": "2025-01-05",
             "intentions": [
               "Walk at lunch",
@@ -1162,24 +1192,14 @@
             "focusRating": 3
           },
           {
-            "date": "2025-01-07",
+            "date": "2025-01-06",
             "intentions": [
-              "Leave the desk by six",
-              "Write before reading",
-              "Review the board before starting"
+              "Clear blockers for tomorrow",
+              "Keep the inbox at zero",
+              "Close the loop on open threads"
             ],
-            "retro": "Lost the thread after lunch. Should have taken the long break.",
-            "energyRating": 4,
-            "focusRating": 2
-          },
-          {
-            "date": "2025-01-08",
-            "intentions": [
-              "Leave the desk by six",
-              "Walk at lunch"
-            ],
-            "retro": "Calm day. Parked five thoughts instead of chasing them — that helped.",
-            "energyRating": 2,
+            "retro": "Good, deep morning. The afternoon drifted into email but the main thing shipped.",
+            "energyRating": 3,
             "focusRating": 5
           },
           {
@@ -1195,13 +1215,13 @@
           {
             "date": "2025-01-10",
             "intentions": [
-              "Close the loop on open threads",
-              "Say no to one thing",
-              "Write before reading"
+              "Plan the week on paper",
+              "Protect the morning for deep work",
+              "Walk at lunch"
             ],
-            "retro": "Kept switching tasks. Tomorrow: one block, one task, no tabs.",
-            "energyRating": 4,
-            "focusRating": 5
+            "retro": "Steady. Nothing dramatic, which is the point.",
+            "energyRating": 2,
+            "focusRating": 4
           },
           {
             "date": "2025-01-11",
@@ -1213,46 +1233,24 @@
             "focusRating": 5
           },
           {
-            "date": "2025-01-14",
+            "date": "2025-01-15",
             "intentions": [
-              "Protect the morning for deep work",
-              "Close the loop on open threads",
-              "Keep the inbox at zero"
+              "Clear blockers for tomorrow"
             ],
-            "retro": "Got pulled into a rabbit hole on tooling. Worth it? Unclear.",
-            "energyRating": 5,
+            "retro": "Kept switching tasks. Tomorrow: one block, one task, no tabs.",
+            "energyRating": 4,
             "focusRating": 2
           },
           {
-            "date": "2025-01-15",
+            "date": "2025-01-18",
             "intentions": [
-              "Walk at lunch"
+              "Walk at lunch",
+              "Write before reading",
+              "Say no to one thing"
             ],
-            "retro": "Kept switching tasks. Tomorrow: one block, one task, no tabs.",
-            "energyRating": 1,
-            "focusRating": 5
-          },
-          {
-            "date": "2025-01-16",
-            "intentions": [
-              "Close the loop on open threads",
-              "Protect the morning for deep work",
-              "Walk at lunch"
-            ],
-            "retro": "Too many meetings; salvaged one focus block at the end of the day.",
-            "energyRating": 2,
-            "focusRating": 1
-          },
-          {
-            "date": "2025-01-17",
-            "intentions": [
-              "Move the hardest task first",
-              "Say no to one thing",
-              "Review the board before starting"
-            ],
-            "retro": "Felt scattered until I wrote the intentions down. Then it clicked.",
+            "retro": "Slow start, strong finish. The 50-minute block worked better than two 25s.",
             "energyRating": 4,
-            "focusRating": 1
+            "focusRating": 5
           },
           {
             "date": "2025-01-19",
@@ -1267,11 +1265,11 @@
           {
             "date": "2025-01-21",
             "intentions": [
-              "One hour on the essay"
+              "Move the hardest task first"
             ],
-            "retro": "Interrupted constantly. Moving the desk away from the door.",
+            "retro": "Felt scattered until I wrote the intentions down. Then it clicked.",
             "energyRating": 4,
-            "focusRating": 5
+            "focusRating": 2
           },
           {
             "date": "2025-01-22",
@@ -1291,6 +1289,15 @@
             "retro": "Interrupted constantly. Moving the desk away from the door.",
             "energyRating": 4,
             "focusRating": 3
+          },
+          {
+            "date": "2025-01-24",
+            "intentions": [
+              "Walk at lunch"
+            ],
+            "retro": "Calm day. Parked five thoughts instead of chasing them — that helped.",
+            "energyRating": 5,
+            "focusRating": 4
           },
           {
             "date": "2025-01-26",
@@ -1324,6 +1331,15 @@
             "focusRating": 2
           },
           {
+            "date": "2025-01-29",
+            "intentions": [
+              "Review the board before starting"
+            ],
+            "retro": "Got pulled into a rabbit hole on tooling. Worth it? Unclear.",
+            "energyRating": 3,
+            "focusRating": 4
+          },
+          {
             "date": "2025-01-30",
             "intentions": [
               "Clear blockers for tomorrow"
@@ -1344,16 +1360,16 @@
         ]
       },
       "thoughts": {
-        "captured": 18,
-        "converted": 3,
-        "kept": 5,
-        "discarded": 4,
-        "pendingInbox": 6,
-        "capturedDuringFocus": 10
+        "captured": 10,
+        "converted": 4,
+        "kept": 1,
+        "discarded": 3,
+        "pendingInbox": 2,
+        "capturedDuringFocus": 5
       },
       "notes": {
-        "created": 3,
-        "updated": 1
+        "created": 11,
+        "updated": 3
       }
     },
     "2025-02": {
@@ -1365,46 +1381,46 @@
       "daysElapsed": 28,
       "generatedAt": "2025-03-31T12:00:00.000Z",
       "deepWork": {
-        "totalMinutes": 1329,
-        "totalHours": 22.2,
-        "sessions": 35,
-        "completedSessions": 25,
-        "avgSessionMinutes": 38,
-        "activeDays": 18,
-        "longestStreakDays": 10,
+        "totalMinutes": 1073,
+        "totalHours": 17.9,
+        "sessions": 31,
+        "completedSessions": 22,
+        "avgSessionMinutes": 35,
+        "activeDays": 17,
+        "longestStreakDays": 6,
         "bestDay": {
-          "date": "2025-02-10",
-          "minutes": 140
+          "date": "2025-02-25",
+          "minutes": 142
         },
         "byWeek": [
           {
             "weekStart": "2025-02-01",
             "weekEnd": "2025-02-02",
-            "minutes": 0,
-            "sessions": 0
+            "minutes": 25,
+            "sessions": 1
           },
           {
             "weekStart": "2025-02-03",
             "weekEnd": "2025-02-09",
-            "minutes": 423,
+            "minutes": 358,
             "sessions": 11
           },
           {
             "weekStart": "2025-02-10",
             "weekEnd": "2025-02-16",
-            "minutes": 398,
-            "sessions": 9
+            "minutes": 232,
+            "sessions": 6
           },
           {
             "weekStart": "2025-02-17",
             "weekEnd": "2025-02-23",
-            "minutes": 210,
-            "sessions": 7
+            "minutes": 163,
+            "sessions": 5
           },
           {
             "weekStart": "2025-02-24",
             "weekEnd": "2025-02-28",
-            "minutes": 298,
+            "minutes": 295,
             "sessions": 8
           }
         ],
@@ -1412,35 +1428,39 @@
           {
             "projectId": "7e57da7a-671c-4f09-8400-87d1be89fbcf",
             "projectName": "Home",
-            "minutes": 515,
-            "sessions": 12
+            "minutes": 333,
+            "sessions": 9
           },
           {
             "projectId": "7e57da7a-8494-463c-8b7f-8632b79dbdcf",
             "projectName": "HeyWork",
-            "minutes": 494,
-            "sessions": 13
+            "minutes": 210,
+            "sessions": 8
           },
           {
             "projectId": null,
             "projectName": "No project",
-            "minutes": 206,
-            "sessions": 7
+            "minutes": 193,
+            "sessions": 6
           },
           {
             "projectId": "7e57da7a-4147-4815-873b-544e6a71cf53",
             "projectName": "Learning",
-            "minutes": 101,
-            "sessions": 2
+            "minutes": 184,
+            "sessions": 4
           },
           {
             "projectId": "7e57da7a-3870-4be4-896b-ad5fbc3f80d7",
             "projectName": "Writing",
-            "minutes": 13,
-            "sessions": 1
+            "minutes": 153,
+            "sessions": 4
           }
         ],
         "byDay": [
+          {
+            "date": "2025-02-02",
+            "minutes": 25
+          },
           {
             "date": "2025-02-03",
             "minutes": 100
@@ -1451,7 +1471,7 @@
           },
           {
             "date": "2025-02-06",
-            "minutes": 123
+            "minutes": 58
           },
           {
             "date": "2025-02-07",
@@ -1467,11 +1487,7 @@
           },
           {
             "date": "2025-02-10",
-            "minutes": 140
-          },
-          {
-            "date": "2025-02-11",
-            "minutes": 140
+            "minutes": 92
           },
           {
             "date": "2025-02-12",
@@ -1479,15 +1495,11 @@
           },
           {
             "date": "2025-02-13",
-            "minutes": 36
+            "minutes": 108
           },
           {
-            "date": "2025-02-14",
-            "minutes": 50
-          },
-          {
-            "date": "2025-02-18",
-            "minutes": 72
+            "date": "2025-02-17",
+            "minutes": 25
           },
           {
             "date": "2025-02-19",
@@ -1499,11 +1511,11 @@
           },
           {
             "date": "2025-02-25",
-            "minutes": 80
+            "minutes": 142
           },
           {
             "date": "2025-02-26",
-            "minutes": 115
+            "minutes": 50
           },
           {
             "date": "2025-02-27",
@@ -1514,30 +1526,30 @@
             "minutes": 28
           }
         ],
-        "breakMinutes": 215
+        "breakMinutes": 160
       },
       "flow": {
-        "sessionsWithSignals": 31,
-        "uninterruptedSessions": 3,
-        "awayMinutes": 33.9,
-        "distractions": 40,
-        "appInteractions": 66,
-        "unverifiedMinutes": 12,
+        "sessionsWithSignals": 25,
+        "uninterruptedSessions": 2,
+        "awayMinutes": 24.9,
+        "distractions": 31,
+        "appInteractions": 58,
+        "unverifiedMinutes": 5,
         "endings": {
-          "completed": 25,
-          "stopped": 8,
+          "completed": 22,
+          "stopped": 7,
           "switched": 2,
           "abandoned": 0,
           "unknown": 0
         }
       },
       "accomplishments": {
-        "tasksCompleted": 7,
+        "tasksCompleted": 6,
         "byPriority": {
-          "low": 3,
-          "medium": 1,
+          "low": 2,
+          "medium": 2,
           "high": 2,
-          "urgent": 1
+          "urgent": 0
         },
         "byProject": [
           {
@@ -1551,10 +1563,23 @@
                 "completedAt": "2025-02-09T18:41:00.000Z",
                 "completedOn": "2025-02-09",
                 "estimatedMinutes": 25,
-                "actualMinutes": 157,
+                "actualMinutes": 110,
                 "tags": [
                   "testdata",
                   "review"
+                ]
+              },
+              {
+                "id": "7e57da7a-4b6f-4e54-82ff-eb7ef7296302",
+                "title": "Plan a no-meeting Wednesday",
+                "priority": "medium",
+                "completedAt": "2025-02-15T13:12:00.000Z",
+                "completedOn": "2025-02-15",
+                "estimatedMinutes": 25,
+                "actualMinutes": 0,
+                "tags": [
+                  "testdata",
+                  "from-thought"
                 ]
               },
               {
@@ -1570,32 +1595,6 @@
                   "bug",
                   "deep"
                 ]
-              },
-              {
-                "id": "7e57da7a-4ab3-4824-8677-4e3d20c7ff50",
-                "title": "Try 50-minute blocks for writing",
-                "priority": "low",
-                "completedAt": "2025-02-15T17:41:00.000Z",
-                "completedOn": "2025-02-15",
-                "estimatedMinutes": 50,
-                "actualMinutes": 0,
-                "tags": [
-                  "testdata",
-                  "from-thought"
-                ]
-              },
-              {
-                "id": "7e57da7a-d01b-45c7-8697-18c64aa7c766",
-                "title": "The chart needs a zero state",
-                "priority": "urgent",
-                "completedAt": "2025-02-18T15:09:00.000Z",
-                "completedOn": "2025-02-18",
-                "estimatedMinutes": 50,
-                "actualMinutes": 98,
-                "tags": [
-                  "testdata",
-                  "from-thought"
-                ]
               }
             ]
           },
@@ -1610,7 +1609,7 @@
                 "completedAt": "2025-02-16T16:10:00.000Z",
                 "completedOn": "2025-02-16",
                 "estimatedMinutes": 120,
-                "actualMinutes": 11,
+                "actualMinutes": 0,
                 "tags": [
                   "testdata",
                   "idea"
@@ -1647,7 +1646,7 @@
                 "completedAt": "2025-02-03T16:44:00.000Z",
                 "completedOn": "2025-02-03",
                 "estimatedMinutes": 50,
-                "actualMinutes": 25,
+                "actualMinutes": 50,
                 "tags": [
                   "testdata",
                   "quick",
@@ -1658,24 +1657,24 @@
           }
         ],
         "estimationAccuracy": {
-          "estimated": 465,
-          "actual": 291,
-          "ratio": 0.6
+          "estimated": 390,
+          "actual": 160,
+          "ratio": 0.4
         },
-        "tasksCreated": 17,
-        "tasksStillOpen": 26
+        "tasksCreated": 16,
+        "tasksStillOpen": 28
       },
       "reflections": {
-        "journalDays": 16,
-        "avgEnergy": 3,
-        "avgFocus": 3.6,
+        "journalDays": 12,
+        "avgEnergy": 3.1,
+        "avgFocus": 3.3,
         "ratingsByWeek": [
           {
             "weekStart": "2025-02-01",
             "weekEnd": "2025-02-02",
-            "energy": 2,
-            "focus": 4,
-            "days": 1
+            "energy": null,
+            "focus": null,
+            "days": 0
           },
           {
             "weekStart": "2025-02-03",
@@ -1687,37 +1686,26 @@
           {
             "weekStart": "2025-02-10",
             "weekEnd": "2025-02-16",
-            "energy": 3.3,
-            "focus": 4,
-            "days": 7
+            "energy": 3.8,
+            "focus": 3.4,
+            "days": 5
           },
           {
             "weekStart": "2025-02-17",
             "weekEnd": "2025-02-23",
-            "energy": 3.7,
+            "energy": 2.7,
             "focus": 3.3,
             "days": 3
           },
           {
             "weekStart": "2025-02-24",
             "weekEnd": "2025-02-28",
-            "energy": 3.5,
-            "focus": 3.5,
-            "days": 2
+            "energy": 5,
+            "focus": 4,
+            "days": 1
           }
         ],
         "entries": [
-          {
-            "date": "2025-02-02",
-            "intentions": [
-              "Plan the week on paper",
-              "Protect the morning for deep work",
-              "Ship one meaningful thing"
-            ],
-            "retro": "Lost the thread after lunch. Should have taken the long break.",
-            "energyRating": 2,
-            "focusRating": 4
-          },
           {
             "date": "2025-02-05",
             "intentions": [
@@ -1752,20 +1740,23 @@
           {
             "date": "2025-02-10",
             "intentions": [
+              "Say no to one thing",
               "Leave the desk by six"
             ],
-            "retro": "Good, deep morning. The afternoon drifted into email but the main thing shipped.",
-            "energyRating": 2,
-            "focusRating": 5
+            "retro": "Finished the chapter draft. Rough, but it exists.",
+            "energyRating": 4,
+            "focusRating": 3
           },
           {
             "date": "2025-02-11",
             "intentions": [
-              "Review the board before starting"
+              "Finish what I started yesterday",
+              "Plan the week on paper",
+              "Two focus blocks before lunch"
             ],
-            "retro": "Got pulled into a rabbit hole on tooling. Worth it? Unclear.",
-            "energyRating": 1,
-            "focusRating": 5
+            "retro": "Best writing session in weeks. Brown noise and a closed door.",
+            "energyRating": 5,
+            "focusRating": 4
           },
           {
             "date": "2025-02-12",
@@ -1776,27 +1767,6 @@
             "retro": "Finished the chapter draft. Rough, but it exists.",
             "energyRating": 2,
             "focusRating": 2
-          },
-          {
-            "date": "2025-02-13",
-            "intentions": [
-              "Review the board before starting",
-              "Write before reading",
-              "Clear blockers for tomorrow"
-            ],
-            "retro": "Good, deep morning. The afternoon drifted into email but the main thing shipped.",
-            "energyRating": 5,
-            "focusRating": 4
-          },
-          {
-            "date": "2025-02-14",
-            "intentions": [
-              "Close the loop on open threads",
-              "Finish what I started yesterday"
-            ],
-            "retro": "Got pulled into a rabbit hole on tooling. Worth it? Unclear.",
-            "energyRating": 5,
-            "focusRating": 4
           },
           {
             "date": "2025-02-15",
@@ -1819,21 +1789,21 @@
           {
             "date": "2025-02-17",
             "intentions": [
-              "Walk at lunch"
+              "Walk at lunch",
+              "Move the hardest task first"
             ],
-            "retro": "Calm day. Parked five thoughts instead of chasing them — that helped.",
-            "energyRating": 3,
+            "retro": "Finished the chapter draft. Rough, but it exists.",
+            "energyRating": 1,
             "focusRating": 4
           },
           {
-            "date": "2025-02-18",
+            "date": "2025-02-20",
             "intentions": [
-              "Plan the week on paper",
-              "Ship one meaningful thing",
-              "Review the board before starting"
+              "Write before reading",
+              "Protect the morning for deep work"
             ],
-            "retro": "Low energy. Did admin instead of forcing deep work. Fine.",
-            "energyRating": 5,
+            "retro": "Interrupted constantly. Moving the desk away from the door.",
+            "energyRating": 4,
             "focusRating": 3
           },
           {
@@ -1850,38 +1820,26 @@
           {
             "date": "2025-02-25",
             "intentions": [
-              "Protect the morning for deep work",
-              "Leave the desk by six",
-              "Plan the week on paper"
+              "Finish what I started yesterday",
+              "Review the board before starting"
             ],
-            "retro": "Finished the chapter draft. Rough, but it exists.",
-            "energyRating": 3,
-            "focusRating": 5
-          },
-          {
-            "date": "2025-02-26",
-            "intentions": [
-              "Close the loop on open threads",
-              "Keep the inbox at zero",
-              "One hour on the essay"
-            ],
-            "retro": "Calm day. Parked five thoughts instead of chasing them — that helped.",
-            "energyRating": 4,
-            "focusRating": 2
+            "retro": "Slow start, strong finish. The 50-minute block worked better than two 25s.",
+            "energyRating": 5,
+            "focusRating": 4
           }
         ]
       },
       "thoughts": {
-        "captured": 13,
-        "converted": 4,
-        "kept": 3,
-        "discarded": 2,
-        "pendingInbox": 4,
-        "capturedDuringFocus": 6
+        "captured": 17,
+        "converted": 3,
+        "kept": 5,
+        "discarded": 8,
+        "pendingInbox": 1,
+        "capturedDuringFocus": 12
       },
       "notes": {
-        "created": 1,
-        "updated": 0
+        "created": 4,
+        "updated": 1
       }
     },
     "2025-03": {
@@ -1893,12 +1851,12 @@
       "daysElapsed": 31,
       "generatedAt": "2025-03-31T12:00:00.000Z",
       "deepWork": {
-        "totalMinutes": 1928,
-        "totalHours": 32.1,
-        "sessions": 45,
-        "completedSessions": 38,
+        "totalMinutes": 1674,
+        "totalHours": 27.9,
+        "sessions": 39,
+        "completedSessions": 35,
         "avgSessionMinutes": 43,
-        "activeDays": 22,
+        "activeDays": 19,
         "longestStreakDays": 6,
         "bestDay": {
           "date": "2025-03-10",
@@ -1914,58 +1872,58 @@
           {
             "weekStart": "2025-03-03",
             "weekEnd": "2025-03-09",
-            "minutes": 405,
-            "sessions": 8
+            "minutes": 165,
+            "sessions": 3
           },
           {
             "weekStart": "2025-03-10",
             "weekEnd": "2025-03-16",
-            "minutes": 575,
-            "sessions": 12
+            "minutes": 584,
+            "sessions": 13
           },
           {
             "weekStart": "2025-03-17",
             "weekEnd": "2025-03-23",
-            "minutes": 418,
-            "sessions": 11
+            "minutes": 466,
+            "sessions": 12
           },
           {
             "weekStart": "2025-03-24",
             "weekEnd": "2025-03-30",
-            "minutes": 406,
-            "sessions": 11
+            "minutes": 319,
+            "sessions": 9
           },
           {
             "weekStart": "2025-03-31",
             "weekEnd": "2025-03-31",
-            "minutes": 124,
-            "sessions": 3
+            "minutes": 140,
+            "sessions": 2
           }
         ],
         "byProject": [
           {
             "projectId": "7e57da7a-8494-463c-8b7f-8632b79dbdcf",
             "projectName": "HeyWork",
-            "minutes": 576,
-            "sessions": 14
-          },
-          {
-            "projectId": "7e57da7a-4147-4815-873b-544e6a71cf53",
-            "projectName": "Learning",
-            "minutes": 528,
-            "sessions": 11
-          },
-          {
-            "projectId": "7e57da7a-3870-4be4-896b-ad5fbc3f80d7",
-            "projectName": "Writing",
-            "minutes": 415,
-            "sessions": 10
+            "minutes": 775,
+            "sessions": 18
           },
           {
             "projectId": "7e57da7a-671c-4f09-8400-87d1be89fbcf",
             "projectName": "Home",
-            "minutes": 294,
+            "minutes": 300,
             "sessions": 8
+          },
+          {
+            "projectId": "7e57da7a-4147-4815-873b-544e6a71cf53",
+            "projectName": "Learning",
+            "minutes": 294,
+            "sessions": 7
+          },
+          {
+            "projectId": "7e57da7a-3870-4be4-896b-ad5fbc3f80d7",
+            "projectName": "Writing",
+            "minutes": 190,
+            "sessions": 4
           },
           {
             "projectId": null,
@@ -1976,20 +1934,8 @@
         ],
         "byDay": [
           {
-            "date": "2025-03-03",
-            "minutes": 115
-          },
-          {
-            "date": "2025-03-04",
-            "minutes": 100
-          },
-          {
             "date": "2025-03-05",
             "minutes": 75
-          },
-          {
-            "date": "2025-03-07",
-            "minutes": 25
           },
           {
             "date": "2025-03-08",
@@ -2000,12 +1946,12 @@
             "minutes": 255
           },
           {
-            "date": "2025-03-12",
-            "minutes": 75
+            "date": "2025-03-11",
+            "minutes": 100
           },
           {
-            "date": "2025-03-13",
-            "minutes": 95
+            "date": "2025-03-12",
+            "minutes": 79
           },
           {
             "date": "2025-03-14",
@@ -2017,7 +1963,7 @@
           },
           {
             "date": "2025-03-17",
-            "minutes": 50
+            "minutes": 100
           },
           {
             "date": "2025-03-18",
@@ -2025,11 +1971,11 @@
           },
           {
             "date": "2025-03-19",
-            "minutes": 63
+            "minutes": 36
           },
           {
             "date": "2025-03-21",
-            "minutes": 90
+            "minutes": 115
           },
           {
             "date": "2025-03-22",
@@ -2049,7 +1995,7 @@
           },
           {
             "date": "2025-03-27",
-            "minutes": 112
+            "minutes": 25
           },
           {
             "date": "2025-03-28",
@@ -2061,33 +2007,33 @@
           },
           {
             "date": "2025-03-31",
-            "minutes": 124
+            "minutes": 140
           }
         ],
-        "breakMinutes": 295
+        "breakMinutes": 225
       },
       "flow": {
-        "sessionsWithSignals": 37,
-        "uninterruptedSessions": 8,
-        "awayMinutes": 23.8,
-        "distractions": 24,
-        "appInteractions": 94,
-        "unverifiedMinutes": 4,
+        "sessionsWithSignals": 30,
+        "uninterruptedSessions": 4,
+        "awayMinutes": 28,
+        "distractions": 29,
+        "appInteractions": 62,
+        "unverifiedMinutes": 9,
         "endings": {
-          "completed": 38,
+          "completed": 35,
           "stopped": 3,
-          "switched": 4,
+          "switched": 1,
           "abandoned": 0,
           "unknown": 0
         }
       },
       "accomplishments": {
-        "tasksCompleted": 12,
+        "tasksCompleted": 15,
         "byPriority": {
-          "low": 1,
+          "low": 3,
           "medium": 3,
-          "high": 3,
-          "urgent": 5
+          "high": 6,
+          "urgent": 3
         },
         "byProject": [
           {
@@ -2095,26 +2041,13 @@
             "projectName": "HeyWork",
             "tasks": [
               {
-                "id": "7e57da7a-051e-4431-8ce9-e9b977e2d924",
-                "title": "Is the streak logic right across time zones?",
-                "priority": "high",
-                "completedAt": "2025-03-04T13:00:00.000Z",
-                "completedOn": "2025-03-04",
-                "estimatedMinutes": 120,
-                "actualMinutes": 176,
-                "tags": [
-                  "testdata",
-                  "from-thought"
-                ]
-              },
-              {
                 "id": "7e57da7a-4272-49c3-8914-a59a76ca6d58",
                 "title": "Add dark-mode contrast pass (3)",
                 "priority": "medium",
                 "completedAt": "2025-03-06T14:03:00.000Z",
                 "completedOn": "2025-03-06",
                 "estimatedMinutes": 50,
-                "actualMinutes": 50,
+                "actualMinutes": 0,
                 "tags": [
                   "testdata",
                   "deep",
@@ -2122,11 +2055,24 @@
                 ]
               },
               {
-                "id": "7e57da7a-6d70-4aa8-8198-46e158932464",
-                "title": "Try the brown noise at lower volume",
-                "priority": "medium",
-                "completedAt": "2025-03-12T16:43:00.000Z",
-                "completedOn": "2025-03-12",
+                "id": "7e57da7a-b909-4042-8db0-14279c9ec14e",
+                "title": "Move the standup to 10:00",
+                "priority": "low",
+                "completedAt": "2025-03-08T18:26:00.000Z",
+                "completedOn": "2025-03-08",
+                "estimatedMinutes": 15,
+                "actualMinutes": 0,
+                "tags": [
+                  "testdata",
+                  "from-thought"
+                ]
+              },
+              {
+                "id": "7e57da7a-077c-4095-8b9d-a1d776a115de",
+                "title": "Reply to the conference CFP",
+                "priority": "high",
+                "completedAt": "2025-03-10T18:36:00.000Z",
+                "completedOn": "2025-03-10",
                 "estimatedMinutes": 50,
                 "actualMinutes": 0,
                 "tags": [
@@ -2135,64 +2081,56 @@
                 ]
               },
               {
-                "id": "7e57da7a-4205-4715-8599-b16d1edbee32",
-                "title": "Is the streak logic right across time zones?",
-                "priority": "urgent",
-                "completedAt": "2025-03-19T16:11:00.000Z",
-                "completedOn": "2025-03-19",
-                "estimatedMinutes": 50,
-                "actualMinutes": 50,
+                "id": "7e57da7a-dc23-4181-8aef-87fd968894b0",
+                "title": "Ask about the invoice from February",
+                "priority": "high",
+                "completedAt": "2025-03-13T18:27:00.000Z",
+                "completedOn": "2025-03-13",
+                "estimatedMinutes": 25,
+                "actualMinutes": 75,
                 "tags": [
                   "testdata",
                   "from-thought"
                 ]
-              }
-            ]
-          },
-          {
-            "projectId": "7e57da7a-4147-4815-873b-544e6a71cf53",
-            "projectName": "Learning",
-            "tasks": [
+              },
               {
-                "id": "7e57da7a-6253-4cbe-80e1-2a8007e88756",
-                "title": "Practice piano scales (7)",
-                "priority": "low",
-                "completedAt": "2025-03-04T16:55:00.000Z",
-                "completedOn": "2025-03-04",
+                "id": "7e57da7a-2101-4151-859d-3de56a37008e",
+                "title": "Tidy the desk cables",
+                "priority": "medium",
+                "completedAt": "2025-03-16T17:34:00.000Z",
+                "completedOn": "2025-03-16",
+                "estimatedMinutes": 90,
+                "actualMinutes": 25,
+                "tags": [
+                  "testdata",
+                  "from-thought"
+                ]
+              },
+              {
+                "id": "7e57da7a-ad91-49dc-889e-0d057ff42326",
+                "title": "Check whether the retry logic double-charges on timeout",
+                "priority": "high",
+                "completedAt": "2025-03-18T15:22:00.000Z",
+                "completedOn": "2025-03-18",
                 "estimatedMinutes": 25,
                 "actualMinutes": 0,
                 "tags": [
                   "testdata",
-                  "admin",
-                  "bug"
+                  "from-thought"
                 ]
               },
               {
-                "id": "7e57da7a-2559-4f88-85e8-547afda5b80d",
-                "title": "Practice piano scales",
+                "id": "7e57da7a-a3ab-43af-8f09-f21f8df33450",
+                "title": "Write migration guide for v2 store (7)",
                 "priority": "high",
-                "completedAt": "2025-03-18T13:03:00.000Z",
-                "completedOn": "2025-03-18",
-                "estimatedMinutes": 15,
-                "actualMinutes": 25,
+                "completedAt": "2025-03-22T13:04:00.000Z",
+                "completedOn": "2025-03-22",
+                "estimatedMinutes": 50,
+                "actualMinutes": 0,
                 "tags": [
                   "testdata",
-                  "review",
-                  "idea"
-                ]
-              },
-              {
-                "id": "7e57da7a-879f-449f-88dd-9e2049cc122b",
-                "title": "Read two chapters of SICP (7)",
-                "priority": "urgent",
-                "completedAt": "2025-03-29T18:05:00.000Z",
-                "completedOn": "2025-03-29",
-                "estimatedMinutes": 90,
-                "actualMinutes": 70,
-                "tags": [
-                  "testdata",
-                  "health",
-                  "idea"
+                  "admin",
+                  "review"
                 ]
               }
             ]
@@ -2208,54 +2146,82 @@
                 "completedAt": "2025-03-03T17:32:00.000Z",
                 "completedOn": "2025-03-03",
                 "estimatedMinutes": 90,
-                "actualMinutes": 0,
+                "actualMinutes": 25,
                 "tags": [
                   "testdata"
                 ]
               },
               {
-                "id": "7e57da7a-a3ab-43af-8f09-f21f8df33450",
-                "title": "Replace bike brake pads (7)",
+                "id": "7e57da7a-2559-4f88-85e8-547afda5b80d",
+                "title": "Book dentist",
                 "priority": "urgent",
-                "completedAt": "2025-03-27T18:10:00.000Z",
-                "completedOn": "2025-03-27",
+                "completedAt": "2025-03-17T15:00:00.000Z",
+                "completedOn": "2025-03-17",
                 "estimatedMinutes": 50,
-                "actualMinutes": 69,
+                "actualMinutes": 25,
                 "tags": [
                   "testdata",
-                  "bug",
-                  "health"
+                  "deep",
+                  "bug"
+                ]
+              },
+              {
+                "id": "7e57da7a-98f3-4103-858f-fdb995a89132",
+                "title": "Back up the photo library (2)",
+                "priority": "low",
+                "completedAt": "2025-03-24T16:42:00.000Z",
+                "completedOn": "2025-03-24",
+                "estimatedMinutes": 15,
+                "actualMinutes": 0,
+                "tags": [
+                  "testdata",
+                  "quick"
+                ]
+              },
+              {
+                "id": "7e57da7a-857c-4e92-8d06-99e02b996e15",
+                "title": "Sort tax receipts (6)",
+                "priority": "high",
+                "completedAt": "2025-03-25T14:17:00.000Z",
+                "completedOn": "2025-03-25",
+                "estimatedMinutes": 15,
+                "actualMinutes": 150,
+                "tags": [
+                  "testdata"
                 ]
               }
             ]
           },
           {
-            "projectId": "7e57da7a-3870-4be4-896b-ad5fbc3f80d7",
-            "projectName": "Writing",
+            "projectId": "7e57da7a-4147-4815-873b-544e6a71cf53",
+            "projectName": "Learning",
             "tasks": [
               {
-                "id": "7e57da7a-459f-4b92-82ad-8d38c2e29007",
-                "title": "Collect reader replies (2)",
-                "priority": "high",
-                "completedAt": "2025-03-05T17:10:00.000Z",
-                "completedOn": "2025-03-05",
-                "estimatedMinutes": 50,
-                "actualMinutes": 113,
+                "id": "7e57da7a-6253-4cbe-80e1-2a8007e88756",
+                "title": "Practice piano scales (7)",
+                "priority": "low",
+                "completedAt": "2025-03-04T16:55:00.000Z",
+                "completedOn": "2025-03-04",
+                "estimatedMinutes": 25,
+                "actualMinutes": 84,
                 "tags": [
-                  "testdata"
+                  "testdata",
+                  "admin",
+                  "bug"
                 ]
               },
               {
-                "id": "7e57da7a-857c-4e92-8d06-99e02b996e15",
-                "title": "Proofread the guest post (6)",
+                "id": "7e57da7a-879f-449f-88dd-9e2049cc122b",
+                "title": "Read two chapters of SICP (7)",
                 "priority": "urgent",
-                "completedAt": "2025-03-18T17:15:00.000Z",
-                "completedOn": "2025-03-18",
-                "estimatedMinutes": 50,
-                "actualMinutes": 125,
+                "completedAt": "2025-03-29T18:05:00.000Z",
+                "completedOn": "2025-03-29",
+                "estimatedMinutes": 90,
+                "actualMinutes": 0,
                 "tags": [
                   "testdata",
-                  "deep"
+                  "health",
+                  "idea"
                 ]
               }
             ]
@@ -2278,20 +2244,38 @@
                 ]
               }
             ]
+          },
+          {
+            "projectId": "7e57da7a-3870-4be4-896b-ad5fbc3f80d7",
+            "projectName": "Writing",
+            "tasks": [
+              {
+                "id": "7e57da7a-459f-4b92-82ad-8d38c2e29007",
+                "title": "Collect reader replies (2)",
+                "priority": "high",
+                "completedAt": "2025-03-05T17:10:00.000Z",
+                "completedOn": "2025-03-05",
+                "estimatedMinutes": 50,
+                "actualMinutes": 13,
+                "tags": [
+                  "testdata"
+                ]
+              }
+            ]
           }
         ],
         "estimationAccuracy": {
           "estimated": 730,
-          "actual": 678,
-          "ratio": 0.9
+          "actual": 397,
+          "ratio": 0.5
         },
-        "tasksCreated": 22,
-        "tasksStillOpen": 42
+        "tasksCreated": 21,
+        "tasksStillOpen": 39
       },
       "reflections": {
-        "journalDays": 22,
-        "avgEnergy": 3.1,
-        "avgFocus": 3.5,
+        "journalDays": 25,
+        "avgEnergy": 3.2,
+        "avgFocus": 3.2,
         "ratingsByWeek": [
           {
             "weekStart": "2025-03-01",
@@ -2303,36 +2287,36 @@
           {
             "weekStart": "2025-03-03",
             "weekEnd": "2025-03-09",
-            "energy": 3.6,
-            "focus": 3.8,
-            "days": 5
+            "energy": 3.9,
+            "focus": 3.3,
+            "days": 7
           },
           {
             "weekStart": "2025-03-10",
             "weekEnd": "2025-03-16",
-            "energy": 3.3,
-            "focus": 4.3,
+            "energy": 3,
+            "focus": 3.7,
             "days": 3
           },
           {
             "weekStart": "2025-03-17",
             "weekEnd": "2025-03-23",
-            "energy": 3.2,
-            "focus": 4.4,
-            "days": 5
+            "energy": 3.7,
+            "focus": 3.8,
+            "days": 6
           },
           {
             "weekStart": "2025-03-24",
             "weekEnd": "2025-03-30",
-            "energy": 2.8,
-            "focus": 2.5,
+            "energy": 2.3,
+            "focus": 2.7,
             "days": 6
           },
           {
             "weekStart": "2025-03-31",
             "weekEnd": "2025-03-31",
-            "energy": 1,
-            "focus": 5,
+            "energy": 3,
+            "focus": 4,
             "days": 1
           }
         ],
@@ -2360,15 +2344,25 @@
             "focusRating": 1
           },
           {
+            "date": "2025-03-03",
+            "intentions": [
+              "Clear blockers for tomorrow",
+              "Say no to one thing"
+            ],
+            "retro": "Low energy. Did admin instead of forcing deep work. Fine.",
+            "energyRating": 4,
+            "focusRating": 5
+          },
+          {
             "date": "2025-03-04",
             "intentions": [
-              "Finish what I started yesterday",
-              "Protect the morning for deep work",
-              "Leave the desk by six"
+              "Move the hardest task first",
+              "Ship one meaningful thing",
+              "Review the board before starting"
             ],
             "retro": "Steady. Nothing dramatic, which is the point.",
-            "energyRating": 2,
-            "focusRating": 5
+            "energyRating": 4,
+            "focusRating": 2
           },
           {
             "date": "2025-03-05",
@@ -2392,6 +2386,15 @@
             "focusRating": 3
           },
           {
+            "date": "2025-03-07",
+            "intentions": [
+              "Finish what I started yesterday"
+            ],
+            "retro": "Good, deep morning. The afternoon drifted into email but the main thing shipped.",
+            "energyRating": 3,
+            "focusRating": 2
+          },
+          {
             "date": "2025-03-08",
             "intentions": [
               "Plan the week on paper"
@@ -2413,22 +2416,21 @@
           {
             "date": "2025-03-11",
             "intentions": [
-              "Two focus blocks before lunch"
+              "Close the loop on open threads",
+              "Clear blockers for tomorrow"
             ],
-            "retro": "Slow start, strong finish. The 50-minute block worked better than two 25s.",
-            "energyRating": 4,
+            "retro": "Steady. Nothing dramatic, which is the point.",
+            "energyRating": 3,
             "focusRating": 4
           },
           {
             "date": "2025-03-13",
             "intentions": [
-              "Two focus blocks before lunch",
-              "Finish what I started yesterday",
-              "Write before reading"
+              "Keep the inbox at zero"
             ],
-            "retro": "Lost the thread after lunch. Should have taken the long break.",
+            "retro": "",
             "energyRating": 3,
-            "focusRating": 4
+            "focusRating": 2
           },
           {
             "date": "2025-03-15",
@@ -2444,11 +2446,12 @@
           {
             "date": "2025-03-17",
             "intentions": [
-              "Two focus blocks before lunch"
+              "Walk at lunch",
+              "Say no to one thing"
             ],
-            "retro": "Good, deep morning. The afternoon drifted into email but the main thing shipped.",
-            "energyRating": 3,
-            "focusRating": 4
+            "retro": "Calm day. Parked five thoughts instead of chasing them — that helped.",
+            "energyRating": 4,
+            "focusRating": 5
           },
           {
             "date": "2025-03-18",
@@ -2463,11 +2466,11 @@
           {
             "date": "2025-03-19",
             "intentions": [
-              "Two focus blocks before lunch"
+              "Walk at lunch"
             ],
-            "retro": "Slow start, strong finish. The 50-minute block worked better than two 25s.",
-            "energyRating": 2,
-            "focusRating": 5
+            "retro": "Best writing session in weeks. Brown noise and a closed door.",
+            "energyRating": 3,
+            "focusRating": 3
           },
           {
             "date": "2025-03-20",
@@ -2481,15 +2484,24 @@
             "focusRating": 4
           },
           {
+            "date": "2025-03-21",
+            "intentions": [
+              "Close the loop on open threads"
+            ],
+            "retro": "Best writing session in weeks. Brown noise and a closed door.",
+            "energyRating": 4,
+            "focusRating": 5
+          },
+          {
             "date": "2025-03-23",
             "intentions": [
-              "Protect the morning for deep work",
               "Plan the week on paper",
+              "Close the loop on open threads",
               "One hour on the essay"
             ],
-            "retro": "Slow start, strong finish. The 50-minute block worked better than two 25s.",
+            "retro": "",
             "energyRating": 5,
-            "focusRating": 5
+            "focusRating": 2
           },
           {
             "date": "2025-03-24",
@@ -2521,12 +2533,13 @@
           {
             "date": "2025-03-27",
             "intentions": [
-              "Two focus blocks before lunch",
-              "Protect the morning for deep work"
+              "Write before reading",
+              "Plan the week on paper",
+              "Keep the inbox at zero"
             ],
-            "retro": "Calm day. Parked five thoughts instead of chasing them — that helped.",
-            "energyRating": 4,
-            "focusRating": 3
+            "retro": "Three blocks, three completions. Rare and nice.",
+            "energyRating": 1,
+            "focusRating": 4
           },
           {
             "date": "2025-03-29",
@@ -2549,25 +2562,25 @@
           {
             "date": "2025-03-31",
             "intentions": [
-              "Protect the morning for deep work"
+              "Clear blockers for tomorrow"
             ],
-            "retro": "Interrupted constantly. Moving the desk away from the door.",
-            "energyRating": 1,
-            "focusRating": 5
+            "retro": "Three blocks, three completions. Rare and nice.",
+            "energyRating": 3,
+            "focusRating": 4
           }
         ]
       },
       "thoughts": {
-        "captured": 14,
-        "converted": 5,
+        "captured": 20,
+        "converted": 4,
         "kept": 4,
-        "discarded": 3,
-        "pendingInbox": 2,
-        "capturedDuringFocus": 9
+        "discarded": 2,
+        "pendingInbox": 10,
+        "capturedDuringFocus": 10
       },
       "notes": {
-        "created": 4,
-        "updated": 1
+        "created": 7,
+        "updated": 4
       }
     },
     "2024-08": {

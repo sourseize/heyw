@@ -8,6 +8,8 @@ import type { DatabaseSchema } from '../../db/database.js';
 import { computeMonthlySummary, monthsWithData } from '../../db/summary.js';
 import type { MonthlySummary } from '../../db/summary.js';
 import { addMonths } from '../../db/time.js';
+import { buildMentionIndex } from '../../db/links.js';
+import { getBacklinks } from '../../db/graph.js';
 import type { Manifest } from './generator.js';
 
 export interface MonthFigures {
@@ -46,6 +48,14 @@ export interface ValidationReport {
   };
   spotChecks: { label: string; value: string | number }[];
   archiveMonths: string[];
+  connections: {
+    explicitLinks: number;
+    mentionEdges: number;
+    unresolvedMentions: number;
+    notesWithMentions: number;
+    tasksWithMentions: number;
+    mostConnected: { title: string; count: number } | null;
+  };
 }
 
 /** Stable hash of the dataset (ids, timestamps and text all included). */
@@ -112,6 +122,22 @@ export function buildReport(data: DatabaseSchema, manifest: Manifest, tz: string
   spotChecks.push({ label: 'Open tasks per project', value: openByProject });
   spotChecks.push({ label: 'Archive months with data', value: monthsWithData(data, tz).join(', ') });
 
+  // Connected thinking: figures the Connections panel and graph must agree with.
+  const mentionIndex = buildMentionIndex(data);
+  const mostConnectedNote = manifest.spotChecks.mostConnectedNoteId ? data.notes.find(n => n.id === manifest.spotChecks.mostConnectedNoteId) : undefined;
+  const mostConnected = mostConnectedNote
+    ? { title: mostConnectedNote.title, count: getBacklinks(data, { type: 'note', id: mostConnectedNote.id }, mentionIndex).connections.length }
+    : null;
+  const connections = {
+    explicitLinks: data.links.length,
+    mentionEdges: mentionIndex.edges.length,
+    unresolvedMentions: [...mentionIndex.unresolved.values()].reduce((n, list) => n + list.length, 0),
+    notesWithMentions: data.notes.filter(n => n.content.includes('[[')).length,
+    tasksWithMentions: data.tasks.filter(t => t.description.includes('[[')).length,
+    mostConnected,
+  };
+  if (mostConnected) spotChecks.push({ label: `Most connected note — “${mostConnected.title}” (open it: the Connections panel count)`, value: mostConnected.count });
+
   return {
     seed: manifest.seed,
     anchor: manifest.anchor,
@@ -139,6 +165,7 @@ export function buildReport(data: DatabaseSchema, manifest: Manifest, tz: string
     },
     spotChecks,
     archiveMonths: monthsWithData(data, tz),
+    connections,
   };
 }
 
@@ -171,6 +198,13 @@ export function renderReportMarkdown(r: ValidationReport): string {
   lines.push(`- Focused today: **${r.dashboard.focusTodayMinutes}m** · completed today: **${r.dashboard.completedToday}** · streak: **${r.dashboard.streak} days** · thought inbox: **${r.dashboard.inboxCount}**`);
   const sc = r.dashboard.statusCounts;
   lines.push(`- Board: backlog ${sc.backlog} · to do ${sc.todo} · in progress ${sc.in_progress} · done ${sc.done} · active projects ${r.dashboard.totalProjects}`);
+  lines.push('');
+  lines.push('## Connected thinking');
+  lines.push('');
+  const c = r.connections;
+  lines.push(`- Explicit links (“Link to…”): **${c.explicitLinks}** · \`[[mentions]]\` resolving to another item: **${c.mentionEdges}** · unresolved: **${c.unresolvedMentions}**`);
+  lines.push(`- Notes that mention something: **${c.notesWithMentions}** of ${r.counts.notes} · tasks whose description mentions a note: **${c.tasksWithMentions}**`);
+  if (c.mostConnected) lines.push(`- Most connected note: **“${c.mostConnected.title}”** with **${c.mostConnected.count}** connections (Notes → Connections panel, and the Connections view)`);
   lines.push('');
   lines.push('## Spot checks');
   lines.push('');
